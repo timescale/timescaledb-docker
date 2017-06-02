@@ -10,7 +10,7 @@ RUN set -ex \
                 openssl \
                 tar \
     && mkdir -p /build/timescaledb \
-    && wget -O /timescaledb.tar.gz https://github.com/timescale/timescaledb/archive/${TIMESCALEDB_VERSION}.tar.gz \ \
+    && wget -O /timescaledb.tar.gz https://github.com/timescale/timescaledb/archive/$TIMESCALEDB_VERSION.tar.gz \
     && tar -C /build/timescaledb --strip-components 1 -zxf /timescaledb.tar.gz \
     && rm -f /timescaledb.tar.gz \
     \
