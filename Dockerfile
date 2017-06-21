@@ -2,7 +2,7 @@ FROM postgres:9.6.3-alpine
 
 MAINTAINER Timescale https://www.timescale.com
 
-ENV TIMESCALEDB_VERSION 0.0.11-beta
+ENV TIMESCALEDB_VERSION 0.0.12-beta
 
 RUN set -ex \
     && apk add --no-cache --virtual .fetch-deps \
