@@ -12,8 +12,8 @@ default: image
 image: .build_$(VERSION)
 
 push: image
-	docker push $(ORG)/$(NAME):latest
 	docker push $(ORG)/$(NAME):$(VERSION)
+	docker push $(ORG)/$(NAME):latest
 
 clean:
 	rm -f *~

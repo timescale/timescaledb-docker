@@ -1,4 +1,4 @@
-FROM timescale/timescaledb:0.6.0
+FROM timescale/timescaledb:0.6.1
 
 MAINTAINER Timescale https://www.timescale.com
 ENV POSTGIS_VERSION 2.3.2
