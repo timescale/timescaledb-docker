@@ -1,8 +1,8 @@
-FROM postgres:9.6.3-alpine
+FROM postgres:10.1-alpine
 
 MAINTAINER Timescale https://www.timescale.com
 
-ENV TIMESCALEDB_VERSION 0.6.1
+ENV TIMESCALEDB_VERSION 0.7.0
 
 RUN set -ex \
     && apk add --no-cache --virtual .fetch-deps \
@@ -20,9 +20,13 @@ RUN set -ex \
                 gcc \
                 libc-dev \
                 make \
+                cmake \
                 util-linux-dev \
     \
-    && make -C /build/timescaledb install \
+    && cd /build/timescaledb \
+    && ./bootstrap \
+    && cd build && make install \
+    && cd ~ \
     \
     && apk del .fetch-deps .build-deps \
     && rm -rf /build \
