@@ -1,4 +1,5 @@
-FROM postgres:10.1-alpine
+ARG PG_VERSION
+FROM postgres:${PG_VERSION}-alpine
 
 MAINTAINER Timescale https://www.timescale.com
 
