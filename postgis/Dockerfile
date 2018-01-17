@@ -19,6 +19,7 @@ RUN set -ex \
         perl \
         file \
         geos-dev \
+        json-c-dev \
         libxml2-dev \
         gdal-dev \
         proj4-dev \
@@ -33,6 +34,8 @@ RUN set -ex \
     && echo "PERL = /usr/bin/perl" >> extensions/postgis_topology/Makefile \
     && make -s \
     && make -s install \
+    && apk add --no-cache --virtual .postgis-rundeps \
+        json-c \
     && cd / \
     \
     && rm -rf /tmp/postgis-${POSTGIS_VERSION} \
