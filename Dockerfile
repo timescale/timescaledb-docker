@@ -33,8 +33,8 @@ RUN set -ex \
     && rm -rf /build \
     && sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'timescaledb,\2'/;s/,'/'/" /usr/local/share/postgresql/postgresql.conf.sample
 
-COPY backup_init.sh .
-RUN chmod +x backup_init.sh
+COPY backup_init.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/backup_init.sh
 
-ENTRYPOINT ["./backup_init.sh"]
+ENTRYPOINT ["backup_init.sh"]
 CMD ["postgres"]
