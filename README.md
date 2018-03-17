@@ -23,7 +23,7 @@ $ docker run -d --name some-timescaledb -p 5432:5432 timescale/timescaledb
 Then connect with an app or the `psql` client:
 
 ```
-$ docker run -it --rm --link some-timescaledb:timescaledb timescale/timescaledb psql -h timescaledb -U postgres
+$ docker run -it --net=host --rm timescale/timescaledb psql -h localhost -U postgres
 ```
 
 You can also connect your app via port `5432` on the host machine.
