@@ -5,7 +5,7 @@ VERSION=$(shell awk '/^ENV TIMESCALEDB_VERSION/ {print $$3}' Dockerfile)
 
 default: image
 
-.build_$(VERSION)_$(PG_VER): Dockerfile backup_init.sh
+.build_$(VERSION)_$(PG_VER): Dockerfile
 ifeq ($(PG_VER),pg9.6)
 	docker build --build-arg PG_VERSION=9.6.8 -t $(ORG)/$(NAME):latest-$(PG_VER) .
 	docker tag $(ORG)/$(NAME):latest-$(PG_VER) $(ORG)/$(NAME):latest

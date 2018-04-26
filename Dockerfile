@@ -32,9 +32,3 @@ RUN set -ex \
     && apk del .fetch-deps .build-deps \
     && rm -rf /build \
     && sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'timescaledb,\2'/;s/,'/'/" /usr/local/share/postgresql/postgresql.conf.sample
-
-COPY backup_init.sh .
-RUN chmod +x backup_init.sh
-
-ENTRYPOINT ["./backup_init.sh"]
-CMD ["postgres"]
