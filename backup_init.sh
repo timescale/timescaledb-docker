@@ -45,4 +45,4 @@ fi
 
 echo "Launching postgres"
 echo "$@"
-./docker-entrypoint.sh "$@"
+exec ./docker-entrypoint.sh "$@"
