@@ -14,6 +14,7 @@ RUN set -ex \
         geos \
         gdal \
         proj4 \
+        protobuf-c \
     && apk add --no-cache --virtual .build-deps --repository http://nl.alpinelinux.org/alpine/edge/testing \
         postgresql-dev \
         perl \
@@ -23,6 +24,7 @@ RUN set -ex \
         libxml2-dev \
         gdal-dev \
         proj4-dev \
+        protobuf-c-dev \
         gcc g++ \
         make \
     && cd /tmp \
