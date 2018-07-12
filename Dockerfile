@@ -5,6 +5,8 @@ MAINTAINER Timescale https://www.timescale.com
 
 ENV TIMESCALEDB_VERSION 0.11.0
 
+COPY docker-entrypoint-initdb.d/reenable_auth.sh /docker-entrypoint-initdb.d/
+
 RUN set -ex \
     && apk add --no-cache --virtual .fetch-deps \
                 ca-certificates \
