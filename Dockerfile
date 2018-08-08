@@ -25,7 +25,7 @@ RUN set -ex \
                 util-linux-dev \
     \
     && cd /build/timescaledb \
-    && ./bootstrap \
+    && ./bootstrap -DPROJECT_INSTALL_METHOD="docker" \
     && cd build && make install \
     && cd ~ \
     \
