@@ -7,7 +7,7 @@ default: image
 
 .build_postgis_$(VERSION)_$(PG_VER): Dockerfile
 ifeq ($(PG_VER),pg9.6)
-	docker build --build-arg POSTGIS_VERSION=2.3.6 --build-arg PG_VERSION_TAG=$(PG_VER) -t $(ORG)/$(NAME):latest-$(PG_VER) .
+	docker build --build-arg POSTGIS_VERSION=2.3.7 --build-arg PG_VERSION_TAG=$(PG_VER) -t $(ORG)/$(NAME):latest-$(PG_VER) .
 	docker tag $(ORG)/$(NAME):latest-$(PG_VER) $(ORG)/$(NAME):latest
 else
 	docker build --build-arg POSTGIS_VERSION=2.4.4 --build-arg PG_VERSION_TAG=$(PG_VER) -t $(ORG)/$(NAME):latest-$(PG_VER) .
