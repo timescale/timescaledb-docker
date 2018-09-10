@@ -1,5 +1,5 @@
 ARG PG_VERSION_TAG
-FROM timescale/timescaledb:0.11.0-${PG_VERSION_TAG}
+FROM timescale/timescaledb:0.12.0-${PG_VERSION_TAG}
 
 MAINTAINER Timescale https://www.timescale.com
 ARG POSTGIS_VERSION
@@ -24,7 +24,6 @@ RUN set -ex \
         perl \
         file \
         geos-dev \
-        json-c-dev \
         libxml2-dev \
         gdal-dev \
         proj4-dev \

@@ -3,7 +3,7 @@ FROM postgres:${PG_VERSION}-alpine
 
 MAINTAINER Timescale https://www.timescale.com
 
-ENV TIMESCALEDB_VERSION 0.11.0
+ENV TIMESCALEDB_VERSION 0.12.0
 
 COPY docker-entrypoint-initdb.d/install_timescaledb.sh /docker-entrypoint-initdb.d/
 COPY docker-entrypoint-initdb.d/reenable_auth.sh /docker-entrypoint-initdb.d/
@@ -12,6 +12,7 @@ RUN set -ex \
     && apk add --no-cache --virtual .fetch-deps \
                 ca-certificates \
                 openssl \
+                openssl-dev \
                 tar \
     && mkdir -p /build/timescaledb \
     && wget -O /timescaledb.tar.gz https://github.com/timescale/timescaledb/archive/$TIMESCALEDB_VERSION.tar.gz \
