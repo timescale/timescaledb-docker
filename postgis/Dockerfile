@@ -3,7 +3,7 @@ FROM timescale/timescaledb:0.12.1-${PG_VERSION_TAG}
 
 MAINTAINER Timescale https://www.timescale.com
 ARG POSTGIS_VERSION
-ENV POSTGIS_VERSION ${POSTGIS_VERSION:-2.4.4}
+ENV POSTGIS_VERSION ${POSTGIS_VERSION:-2.5.0}
 
 RUN set -ex \
     && apk add --no-cache --virtual .fetch-deps \
@@ -28,6 +28,7 @@ RUN set -ex \
         gdal-dev \
         proj4-dev \
         protobuf-c-dev \
+        json-c-dev \
         gcc g++ \
         make \
     && cd /tmp \
