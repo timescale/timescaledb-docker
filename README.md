@@ -28,3 +28,10 @@ $ docker run -it --net=host --rm timescale/timescaledb psql -h localhost -U post
 
 You can also connect your app via port `5432` on the host machine.
 
+Note that you can also set an environmental variable, `TIMESCALEDB_TELEMETRY`, to set the level of [telemetry](https://docs.timescale.com/using-timescaledb/telemetry) in the Timescale docker instance. For example, to turn off telemetry, run:
+
+```
+$ docker run -d --name some-timescaledb -p 5432:5432 --env TIMESCALEDB_TELEMETRY=off timescale/timescaledb
+```
+
+The default telemetry level is `basic`.
