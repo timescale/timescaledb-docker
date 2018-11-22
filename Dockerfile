@@ -5,8 +5,8 @@ MAINTAINER Timescale https://www.timescale.com
 
 ENV TIMESCALEDB_VERSION 1.0.0
 
-COPY docker-entrypoint-initdb.d/install_timescaledb.sh /docker-entrypoint-initdb.d/
-COPY docker-entrypoint-initdb.d/reenable_auth.sh /docker-entrypoint-initdb.d/
+COPY docker-entrypoint-initdb.d/000_install_timescaledb.sh /docker-entrypoint-initdb.d/
+COPY docker-entrypoint-initdb.d/001_reenable_auth.sh /docker-entrypoint-initdb.d/
 
 RUN set -ex \
     && apk add --no-cache --virtual .fetch-deps \
