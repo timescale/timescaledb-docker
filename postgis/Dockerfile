@@ -1,5 +1,5 @@
 ARG PG_VERSION_TAG
-FROM timescale/timescaledb:1.0.0-${PG_VERSION_TAG}
+FROM timescale/timescaledb:1.0.1-${PG_VERSION_TAG}
 
 MAINTAINER Timescale https://www.timescale.com
 ARG POSTGIS_VERSION
@@ -14,6 +14,7 @@ RUN set -ex \
     && apk add --no-cache --virtual .crypto-rundeps \
                 --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
                 libressl2.7-libcrypto \
+                libcrypto1.1 \
     && apk add --no-cache --virtual .postgis-deps --repository http://nl.alpinelinux.org/alpine/edge/testing \
         geos \
         gdal \
