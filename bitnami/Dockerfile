@@ -1,5 +1,6 @@
 ARG PG_VERSION
 FROM bitnami/postgresql:${PG_VERSION}
+ARG PG_VERSION
 
 MAINTAINER Timescale https://www.timescale.com
 
@@ -29,13 +30,19 @@ RUN set -ex \
     && git clone https://github.com/timescale/timescaledb /build/timescaledb \
     \
     # Build old versions to keep .so and .sql files around \
-    && OLD_VERSIONS="0.9.2 0.10.0 0.10.1 0.11.0 \
-    0.12.0 0.12.1 \ 1.0.0-rc1 1.0.0-rc2 1.0.0-rc3 1.0.0 1.0.1" \
+    && OLD_VERSIONS_PRE11="0.9.2 0.10.0 0.10.1 0.11.0 \
+    0.12.0 0.12.1 1.0.0-rc1 1.0.0-rc2 1.0.0-rc3 \
+    1.0.0 1.0.1" \
+    && OLD_VERSIONS_11="" \
+    && OLD_VERSIONS="${OLD_VERSIONS_11}" \
+    && if [ "$(echo ${PG_VERSION} | cut -c1-2)" != "11" ]; then \
+        OLD_VERSIONS="${OLD_VERSIONS_PRE11} ${OLD_VERSIONS_11}"; \
+    fi \
     && for VERSION in ${OLD_VERSIONS}; do \
-        cd /build/timescaledb && \
-        rm -fr build && git checkout ${VERSION} && \
-        ./bootstrap -DPROJECT_INSTALL_METHOD="docker" && \
-        cd build && make install; \
+        cd /build/timescaledb \
+        && rm -fr build && git checkout ${VERSION} \
+        && ./bootstrap -DPROJECT_INSTALL_METHOD="docker" \
+        && cd build && make install; \
     done \
     \
     # Remove unnecessary update files & mock files \

@@ -12,7 +12,7 @@ ifeq ($(PG_VER),pg9.6)
 else ifeq ($(PG_VER),pg10)
 	docker build --build-arg PG_VERSION=10.6.0 -t $(ORG)/$(NAME):latest-$(PG_VER)-bitnami .
 else
-	docker build --build-arg PG_VERSION=11.1 -t $(ORG)/$(NAME):latest-$(PG_VER) .
+	docker build --build-arg PG_VERSION=11.1.0 -t $(ORG)/$(NAME):latest-$(PG_VER)-bitnami .
 endif
 	docker tag $(ORG)/$(NAME):latest-$(PG_VER)-bitnami $(ORG)/$(NAME):$(VERSION)-$(PG_VER)-bitnami
 	touch .build_$(VERSION)_$(PG_VER)-bitnami
@@ -22,9 +22,6 @@ image: .build_$(VERSION)_$(PG_VER)
 push: image
 	docker push $(ORG)/$(NAME):$(VERSION)-$(PG_VER)-bitnami
 	docker push $(ORG)/$(NAME):latest-$(PG_VER)-bitnami
-ifeq ($(PG_VER),pg9.6)
-	docker push $(ORG)/$(NAME):latest-bitnami
-endif
 
 clean:
 	rm -f *~ .build_*
