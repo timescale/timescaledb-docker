@@ -1,4 +1,29 @@
+############################
+# Build tools binaries in separate image
+############################
 ARG PG_VERSION
+FROM golang:alpine AS tools
+
+
+RUN apk update && apk add --no-cache git \
+    && mkdir -p ${GOPATH}/src/github.com/timescale/ \
+    && cd ${GOPATH}/src/github.com/timescale/ \
+    && git clone https://github.com/timescale/timescaledb-tune.git \
+    && git clone https://github.com/timescale/timescaledb-parallel-copy.git \
+    # Build timescaledb-tune
+    && cd timescaledb-tune/cmd/timescaledb-tune \
+    && git checkout $(git describe --abbrev=0) \
+    && go get -d -v \
+    && go build -o /go/bin/timescaledb-tune \
+    # Build timescaledb-parallel-copy
+    && cd ${GOPATH}/src/github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy \
+    && git checkout $(git describe --abbrev=0) \
+    && go get -d -v \
+    && go build -o /go/bin/timescaledb-parallel-copy
+
+############################
+# Now build image and copy in tools
+############################
 FROM postgres:${PG_VERSION}-alpine
 ARG PG_VERSION
 
@@ -9,6 +34,9 @@ ENV TIMESCALEDB_VERSION 1.1.1
 
 COPY docker-entrypoint-initdb.d/000_install_timescaledb.sh /docker-entrypoint-initdb.d/
 COPY docker-entrypoint-initdb.d/001_reenable_auth.sh /docker-entrypoint-initdb.d/
+COPY docker-entrypoint-initdb.d/002_timescaledb_tune.sh /docker-entrypoint-initdb.d/
+COPY --from=tools /go/bin/timescaledb-tune /usr/local/bin/timescaledb-tune
+COPY --from=tools /go/bin/timescaledb-parallel-copy /usr/local/bin/timescaledb-parallel-copy
 
 RUN set -ex \
     && apk add --no-cache --virtual .fetch-deps \
