@@ -4,6 +4,7 @@
 ARG PG_VERSION
 FROM golang:alpine AS tools
 
+ENV TOOLS_VERSION 0.3.0
 
 RUN apk update && apk add --no-cache git \
     && mkdir -p ${GOPATH}/src/github.com/timescale/ \
@@ -12,12 +13,12 @@ RUN apk update && apk add --no-cache git \
     && git clone https://github.com/timescale/timescaledb-parallel-copy.git \
     # Build timescaledb-tune
     && cd timescaledb-tune/cmd/timescaledb-tune \
-    && git checkout $(git describe --abbrev=0) \
+    && git fetch && git checkout --quiet $(git describe --abbrev=0) \
     && go get -d -v \
     && go build -o /go/bin/timescaledb-tune \
     # Build timescaledb-parallel-copy
     && cd ${GOPATH}/src/github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy \
-    && git checkout $(git describe --abbrev=0) \
+    && git fetch && git checkout --quiet $(git describe --abbrev=0) \
     && go get -d -v \
     && go build -o /go/bin/timescaledb-parallel-copy
 
@@ -60,8 +61,8 @@ RUN set -ex \
     # Build old versions to keep .so and .sql files around \
     && OLD_VERSIONS_PRE11="0.10.0 0.10.1 0.11.0 \
     0.12.0 0.12.1 1.0.0-rc1 1.0.0-rc2 1.0.0-rc3 \
-    1.0.0 1.0.1 1.1.0" \
-    && OLD_VERSIONS_11="" \
+    1.0.0 1.0.1" \
+    && OLD_VERSIONS_11="1.1.0" \
     && OLD_VERSIONS="${OLD_VERSIONS_11}" \
     && if [ "$(echo ${PG_VERSION} | cut -c1-2)" != "11" ]; then \
         OLD_VERSIONS="${OLD_VERSIONS_PRE11} ${OLD_VERSIONS_11}"; \
