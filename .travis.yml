@@ -1,0 +1,38 @@
+sudo: 'required'
+
+dist: trusty
+
+services:
+  - 'docker'
+
+# Useful for forks by other contributors
+env:
+  global:
+  - ORG=$DOCKER_USERNAME
+
+matrix:
+  include:
+    - env: PG_VER=pg9.6
+    - env: PG_VER=pg10
+    - env: PG_VER=pg11
+    - env: PG_VER=pg11-bitnami
+  fast_finish: true
+
+script:
+  - 'make image'
+
+after_success:
+  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then
+      docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD;
+      make push;
+    else
+      echo "Build succeeded in non-master branch"
+    fi
+
+# Uncomment if only commits to master require builds
+# branches:
+#   except:
+#     - master
+
+notifications:
+  email: false

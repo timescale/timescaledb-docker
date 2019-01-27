@@ -1,7 +1,7 @@
-NAME=timescaledb
-ORG=timescale
-PG_VER=pg10
-VERSION=$(shell awk '/^ENV TIMESCALEDB_VERSION/ {print $$3}' Dockerfile)
+NAME?=timescaledb
+ORG?=timescale
+PG_VER?=pg10
+VERSION?=$(shell awk '/^ENV TIMESCALEDB_VERSION/ {print $$3}' Dockerfile)
 
 default: image
 
