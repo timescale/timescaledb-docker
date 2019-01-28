@@ -1,4 +1,27 @@
 ARG PG_VERSION
+############################
+# Build tools binaries in separate image
+############################
+FROM golang:alpine AS tools
+
+ENV TOOLS_VERSION 0.3.0
+
+RUN apk update && apk add --no-cache git \
+    && mkdir -p ${GOPATH}/src/github.com/timescale/ \
+    && cd ${GOPATH}/src/github.com/timescale/ \
+    && git clone https://github.com/timescale/timescaledb-tune.git \
+    && git clone https://github.com/timescale/timescaledb-parallel-copy.git \
+    # Build timescaledb-tune
+    && cd timescaledb-tune/cmd/timescaledb-tune \
+    && git fetch && git checkout --quiet $(git describe --abbrev=0) \
+    && go get -d -v \
+    && go build -o /go/bin/timescaledb-tune \
+    # Build timescaledb-parallel-copy
+    && cd ${GOPATH}/src/github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy \
+    && git fetch && git checkout --quiet $(git describe --abbrev=0) \
+    && go get -d -v \
+    && go build -o /go/bin/timescaledb-parallel-copy
+
 FROM bitnami/postgresql:${PG_VERSION}
 ARG PG_VERSION
 
@@ -7,8 +30,8 @@ MAINTAINER Timescale https://www.timescale.com
 # Update list below to include previous versions when changing this
 ENV TIMESCALEDB_VERSION 1.1.1
 
-COPY docker-entrypoint-initdb.d/000_install_timescaledb.sh /docker-entrypoint-initdb.d/
-COPY docker-entrypoint-initdb.d/001_reenable_auth.sh /docker-entrypoint-initdb.d/
+COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
+COPY --from=tools /go/bin/* /usr/local/bin/
 
 USER 0
 RUN set -ex \
