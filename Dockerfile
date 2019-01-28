@@ -28,6 +28,7 @@ RUN apk update && apk add --no-cache git \
 ARG PG_VERSION
 FROM postgres:${PG_VERSION}-alpine AS oldversions
 ARG PG_VERSION
+ARG OSS_ONLY
 RUN set -ex \
     && apk add --no-cache --virtual .fetch-deps \
                 ca-certificates \
@@ -50,7 +51,7 @@ RUN set -ex \
     && cd /build/timescaledb \
     # This script is a bit ugly, but once all the old versions are buildable
     # on PG11, we can remove the 'if' guard
-    && echo "if [ \"$(echo ${PG_VERSION} | cut -c1-2)\" != \"11\" ] || [ "\${OLD_VERSION}" \> "1.0.1" ]; then cd /build/timescaledb && rm -fr build && git checkout \${OLD_VERSION} && ./bootstrap -DPROJECT_INSTALL_METHOD=\"docker\" && cd build && make install; fi" > ./build_old.sh \
+    && echo "if [ \"$(echo ${PG_VERSION} | cut -c1-2)\" != \"11\" ] || [ "\${OLD_VERSION}" \> "1.0.1" ]; then cd /build/timescaledb && rm -fr build && git checkout \${OLD_VERSION} && ./bootstrap -DPROJECT_INSTALL_METHOD=\"docker\"${OSS_ONLY} && cd build && make install; fi" > ./build_old.sh \
     && chmod +x ./build_old.sh
 
 #####
@@ -87,6 +88,7 @@ RUN \
 ############################
 ARG PG_VERSION
 FROM postgres:${PG_VERSION}-alpine
+ARG OSS_ONLY
 
 MAINTAINER Timescale https://www.timescale.com
 
@@ -120,7 +122,7 @@ RUN set -ex \
     # Build current version \
     && cd /build/timescaledb && rm -fr build \
     && git checkout ${TIMESCALEDB_VERSION} \
-    && ./bootstrap -DPROJECT_INSTALL_METHOD="docker" \
+    && ./bootstrap -DPROJECT_INSTALL_METHOD="docker"${OSS_ONLY} \
     && cd build && make install \
     && cd ~ \
     \
