@@ -7,12 +7,12 @@ default: image
 
 .build_$(VERSION)_$(PG_VER): Dockerfile
 ifeq ($(PG_VER),pg9.6)
-	docker build --build-arg PG_VERSION=9.6.11 -t $(ORG)/$(NAME):latest-$(PG_VER)-bitnami .
+	docker build -f ./Dockerfile --build-arg PG_VERSION=9.6.11 -t $(ORG)/$(NAME):latest-$(PG_VER)-bitnami ..
 	docker tag $(ORG)/$(NAME):latest-$(PG_VER)-bitnami $(ORG)/$(NAME):latest-bitnami
 else ifeq ($(PG_VER),pg10)
-	docker build --build-arg PG_VERSION=10.6.0 -t $(ORG)/$(NAME):latest-$(PG_VER)-bitnami .
+	docker build -f ./Dockerfile --build-arg PG_VERSION=10.6.0 -t $(ORG)/$(NAME):latest-$(PG_VER)-bitnami ..
 else
-	docker build --build-arg PG_VERSION=11.1.0 -t $(ORG)/$(NAME):latest-$(PG_VER)-bitnami .
+	docker build -f ./Dockerfile --build-arg PG_VERSION=11.1.0 -t $(ORG)/$(NAME):latest-$(PG_VER)-bitnami ..
 endif
 	docker tag $(ORG)/$(NAME):latest-$(PG_VER)-bitnami $(ORG)/$(NAME):$(VERSION)-$(PG_VER)-bitnami
 	touch .build_$(VERSION)_$(PG_VER)-bitnami
