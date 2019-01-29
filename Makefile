@@ -30,7 +30,11 @@ ifeq ($(PG_VER),pg9.6)
 	docker push $(ORG)/$(NAME):latest
 endif
 
+push-oss: oss
+	docker push $(ORG)/$(NAME):$(VERSION)-$(PG_VER)-oss
+	docker push $(ORG)/$(NAME):latest-$(PG_VER)-oss
+
 clean:
 	rm -f *~ .build_*
 
-.PHONY: default image push clean
+.PHONY: default image push push-oss oss clean

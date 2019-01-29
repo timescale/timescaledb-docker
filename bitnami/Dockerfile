@@ -28,7 +28,7 @@ ARG PG_VERSION
 MAINTAINER Timescale https://www.timescale.com
 
 # Update list below to include previous versions when changing this
-ENV TIMESCALEDB_VERSION 1.1.1
+ENV TIMESCALEDB_VERSION 1.2.0
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
@@ -53,10 +53,9 @@ RUN set -ex \
     && git clone https://github.com/timescale/timescaledb /build/timescaledb \
     \
     # Build old versions to keep .so and .sql files around \
-    && OLD_VERSIONS_PRE11="0.10.0 0.10.1 0.11.0 \
-    0.12.0 0.12.1 1.0.0-rc1 1.0.0-rc2 1.0.0-rc3 \
-    1.0.0 1.0.1 1.1.0" \
-    && OLD_VERSIONS_11="" \
+    && OLD_VERSIONS_PRE11="0.12.1 1.0.0-rc1 1.0.0-rc2 1.0.0-rc3 \
+    1.0.0 1.0.1" \
+    && OLD_VERSIONS_11="1.1.0 1.1.1" \
     && OLD_VERSIONS="${OLD_VERSIONS_11}" \
     && if [ "$(echo ${PG_VERSION} | cut -c1-2)" != "11" ]; then \
         OLD_VERSIONS="${OLD_VERSIONS_PRE11} ${OLD_VERSIONS_11}"; \
