@@ -4,7 +4,7 @@ ARG PG_VERSION
 ############################
 FROM golang:alpine AS tools
 
-ENV TOOLS_VERSION 0.3.0
+ENV TOOLS_VERSION 0.4.0
 
 RUN apk update && apk add --no-cache git \
     && mkdir -p ${GOPATH}/src/github.com/timescale/ \
@@ -22,16 +22,12 @@ RUN apk update && apk add --no-cache git \
     && go get -d -v \
     && go build -o /go/bin/timescaledb-parallel-copy
 
-FROM bitnami/postgresql:${PG_VERSION}
+############################
+# Build old versions in a separate stage
+############################
 ARG PG_VERSION
-
-MAINTAINER Timescale https://www.timescale.com
-
-# Update list below to include previous versions when changing this
-ENV TIMESCALEDB_VERSION 1.2.0
-
-COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
-COPY --from=tools /go/bin/* /usr/local/bin/
+FROM bitnami/postgresql:${PG_VERSION} AS oldversions
+ARG PG_VERSION
 
 USER 0
 RUN set -ex \
@@ -52,24 +48,85 @@ RUN set -ex \
     && mkdir -p /build/ \
     && git clone https://github.com/timescale/timescaledb /build/timescaledb \
     \
-    # Build old versions to keep .so and .sql files around \
-    && OLD_VERSIONS_PRE11="0.12.1 1.0.0-rc1 1.0.0-rc2 1.0.0-rc3 \
-    1.0.0 1.0.1" \
-    && OLD_VERSIONS_11="1.1.0 1.1.1" \
-    && OLD_VERSIONS="${OLD_VERSIONS_11}" \
-    && if [ "$(echo ${PG_VERSION} | cut -c1-2)" != "11" ]; then \
-        OLD_VERSIONS="${OLD_VERSIONS_PRE11} ${OLD_VERSIONS_11}"; \
-    fi \
-    && for VERSION in ${OLD_VERSIONS}; do \
-        cd /build/timescaledb \
-        && rm -fr build && git checkout ${VERSION} \
-        && ./bootstrap -DPROJECT_INSTALL_METHOD="docker" \
-        && cd build && make install; \
-    done \
-    \
-    # Remove unnecessary update files & mock files \
-    && rm -f `pg_config --sharedir`/extension/timescaledb--*--*.sql \
-    && rm -f `pg_config --sharedir`/extension/timescaledb*mock*.sql \
+    && cd /build/timescaledb \
+    # This script is a bit ugly, but once all the old versions are buildable
+    # on PG11, we can remove the 'if' guard
+    && echo "if [ \"$(echo ${PG_VERSION} | cut -c1-2)\" != \"11\" ] || [ "\${OLD_VERSION}" \> "1.0.1" ]; then cd /build/timescaledb && rm -fr build && git fetch && git checkout \${OLD_VERSION} && ./bootstrap -DPROJECT_INSTALL_METHOD=\"docker\" && cd build && make install; fi" > ./build_old.sh \
+    && chmod +x ./build_old.sh
+
+#####
+# Add the latest previous version to the end of the list for each new build
+#####
+RUN OLD_VERSION=1.0.0 /build/timescaledb/build_old.sh
+RUN OLD_VERSION=1.0.1 /build/timescaledb/build_old.sh
+RUN OLD_VERSION=1.1.0 /build/timescaledb/build_old.sh
+RUN OLD_VERSION=1.1.1 /build/timescaledb/build_old.sh
+RUN OLD_VERSION=1.2.0 /build/timescaledb/build_old.sh
+
+# Cleanup
+RUN \
+    # Remove update files and mock files; not needed for old versions
+    echo $(pg_config --pkglibdir) \
+    && rm -f $(pg_config --sharedir)/extension/timescaledb--*--*.sql \
+    && rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql \
+    # Remove all but the last several versiosn ()
+    && KEEP_NUM_VERSIONS=5   # This number should be reduced to 5 eventually \
+    && rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-*.so | head -n -${KEEP_NUM_VERSIONS}) \
+    && rm -f $(ls -1 $(pg_config --sharedir)/extension/timescaledb-*.sql | head -n -${KEEP_NUM_VERSIONS}) \
+    # Clean up the rest of the image
+    && cd ~ \
+    && apt-get autoremove --purge -y \
+            \
+            build-essential \
+            libssl-dev \
+            \
+            dpkg-dev \
+            gcc \
+            libc-dev \
+            make \
+            cmake \
+    && apt-get clean -y \
+    && rm -rf \
+      "${HOME}/.cache" \
+        /var/lib/apt/lists/* \
+        /tmp/*               \
+        /var/tmp/*
+
+############################
+# Now build image and copy in tools
+############################
+ARG PG_VERSION
+FROM bitnami/postgresql:${PG_VERSION}
+ARG PG_VERSION
+
+MAINTAINER Timescale https://www.timescale.com
+
+# Update list below to include previous versions when changing this
+ENV TIMESCALEDB_VERSION 1.2.1
+
+COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
+COPY --from=tools /go/bin/* /usr/local/bin/
+COPY --from=oldversions /opt/bitnami/postgresql/lib/timescaledb-*.so /usr/local/lib/postgresql/
+COPY --from=oldversions /opt/bitnami/postgresql/share/extension/timescaledb--*.sql /usr/local/share/postgresql/extension/
+
+USER 0
+RUN set -ex \
+    && mkdir -p /var/lib/apt/lists/partial \
+    && apt-get update \
+    && apt-get -y install \
+            \
+            build-essential \
+            libssl-dev \
+            git \
+            \
+            dpkg-dev \
+            gcc \
+            libc-dev \
+            make \
+            cmake \
+            wget \
+    && mkdir -p /build/ \
+    && git clone https://github.com/timescale/timescaledb /build/timescaledb \
     \
     # Build current version \
     && cd /build/timescaledb && rm -fr build \
@@ -93,8 +150,6 @@ RUN set -ex \
       "${HOME}/.cache" \
         /var/lib/apt/lists/* \
         /tmp/*               \
-        /var/tmp/*           \
-    \
-    && sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'timescaledb,\2'/;s/,'/'/" /opt/bitnami/postgresql/share/postgresql.conf.sample
+        /var/tmp/*          
 
 USER 1001
