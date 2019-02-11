@@ -35,3 +35,27 @@ $ docker run -d --name some-timescaledb -p 5432:5432 --env TIMESCALEDB_TELEMETRY
 ```
 
 Note that if the cluster has previously been initialized, you should not use this environment variable to set the level of telemetry. Instead, follow the [instructions](https://docs.timescale.com/using-timescaledb/telemetry) in our docs to disable telemetry once a cluster is running.
+
+### Notes on timescaledb-tune
+
+We run `timescaledb-tune` automatically on container initialization. By default,
+`timescaledb-tune` uses system calls to retrieve an instance's available CPU
+and memory. In docker images, these system calls reflect the available resources
+on the **host**. For cases where a container is allocated all available
+resources on a host, this is fine. But many use cases involve limiting the
+amount of resources a container (or the docker daemon) can have on the host.
+Therefore, this image looks in the cgroups metadata to determine the
+docker-defined limit sizes then passes those values to `timescaledb-tune`.
+
+To specify your own limits, use the `TS_TUNE_MEMORY` and `TS_TUNE_NUM_CPUS`
+environment variables at runtime:
+
+```
+$ docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e TS_TUNE_MEMORY=4GB -e TS_TUNE_NUM_CPUS=4 timescale/timescaledb:latest-pg11
+```
+
+To not run `timescaledb-tune` at all, use the `NO_TS_TUNE` environment variable:
+
+```
+$ docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e NO_TS_TUNE=true timescale/timescaledb:latest-pg11
+```
