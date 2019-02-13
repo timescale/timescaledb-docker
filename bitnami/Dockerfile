@@ -4,7 +4,7 @@ ARG PG_VERSION
 ############################
 FROM golang:alpine AS tools
 
-ENV TOOLS_VERSION 0.4.0
+ENV TOOLS_VERSION 0.4.1
 
 RUN apk update && apk add --no-cache git \
     && mkdir -p ${GOPATH}/src/github.com/timescale/ \
@@ -150,6 +150,6 @@ RUN set -ex \
       "${HOME}/.cache" \
         /var/lib/apt/lists/* \
         /tmp/*               \
-        /var/tmp/*          
+        /var/tmp/*
 
 USER 1001
