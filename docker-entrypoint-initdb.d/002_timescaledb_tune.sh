@@ -18,7 +18,9 @@ if [ -z "${TS_TUNE_MEMORY}" ]; then
     # See if we can get the container's total allocated memory from the cgroups metadata
     if [ -f /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
         TS_TUNE_MEMORY=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes)
-        if [ $(echo -n $TS_TUNE_MEMORY) -gt $(free -b | grep 'Mem' | awk '{print $2}') ]; then
+        FREE_MB=$(free -m | grep 'Mem' | awk '{print $2}')
+        FREE_BYTES=$(( ${FREE_MB} * 1024 * 1024 ))
+        if [ ${TS_TUNE_MEMORY} -gt ${FREE_BYTES} ]; then
             # Something weird is going on if the cgroups memory limit exceeds the total available
             # amount of system memory reported by "free", which is the total amount of memory available on the host.
             # Most likely, it is this issue: https://github.com/moby/moby/issues/18087 (if no limit is
@@ -27,7 +29,7 @@ if [ -z "${TS_TUNE_MEMORY}" ]; then
             TS_TUNE_MEMORY=""
         else
             # Convert the bytes to MB so it plays nicely with timescaledb-tune
-            TS_TUNE_MEMORY="$(echo $TS_TUNE_MEMORY | awk '{print int($1 / 1024 / 1024)}')MB"
+            TS_TUNE_MEMORY="$(echo ${TS_TUNE_MEMORY} | awk '{print int($1 / 1024 / 1024)}')MB"
         fi
     fi
 fi
