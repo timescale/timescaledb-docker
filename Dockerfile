@@ -51,7 +51,7 @@ RUN set -ex \
     && cd /build/timescaledb \
     # This script is a bit ugly, but once all the old versions are buildable
     # on PG11, we can remove the 'if' guard
-    && echo "if [ \"$(echo ${PG_VERSION} | cut -c1-2)\" != \"11\" ] || [ "\${OLD_VERSION}" \> "1.0.1" ]; then cd /build/timescaledb && rm -fr build && git checkout \${OLD_VERSION} && ./bootstrap -DPROJECT_INSTALL_METHOD=\"docker\"${OSS_ONLY} && cd build && make install; fi" > ./build_old.sh \
+    && echo "if [ \"$(echo ${PG_VERSION} | cut -c1-2)\" != \"11\" ] || [ "\${OLD_VERSION}" \> "1.0.1" ]; then cd /build/timescaledb && rm -fr build && git reset HEAD --hard && git fetch && git checkout \${OLD_VERSION} && ./bootstrap -DPROJECT_INSTALL_METHOD=\"docker\"${OSS_ONLY} && cd build && make install; fi" > ./build_old.sh \
     && chmod +x ./build_old.sh
 
 #####
@@ -69,8 +69,8 @@ RUN OLD_VERSION=1.0.0 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.0.1 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.1.0 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.1.1 /build/timescaledb/build_old.sh
-RUN cd /build/timescaledb && git fetch
 RUN OLD_VERSION=1.2.0 /build/timescaledb/build_old.sh
+RUN OLD_VERSION=1.2.1 /build/timescaledb/build_old.sh
 
 # Cleanup
 RUN \
@@ -96,7 +96,7 @@ ARG OSS_ONLY
 MAINTAINER Timescale https://www.timescale.com
 
 # Update list above to include previous versions when changing this
-ENV TIMESCALEDB_VERSION 1.2.1
+ENV TIMESCALEDB_VERSION 1.2.2
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
