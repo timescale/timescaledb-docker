@@ -18,6 +18,16 @@ if [ -z "${TS_TUNE_MEMORY}" ]; then
     # See if we can get the container's total allocated memory from the cgroups metadata
     if [ -f /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
         TS_TUNE_MEMORY=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes)
+
+        if [ "${TS_TUNE_MEMORY}" = "18446744073709551615" ]; then
+            # Bash seems to error out for numbers greater than signed 64-bit,
+            # so if the value of limit_in_bytes is the 64-bit UNSIGNED max value
+            # we should just bail out and hope timescaledb-tune can figure this
+            # out. If we don't, the next comparison is likely going to fail
+            # or it might store a negative value which will crash later.
+            TS_TUNE_MEMORY=""
+        fi
+
         FREE_MB=$(free -m | grep 'Mem' | awk '{print $2}')
         FREE_BYTES=$(( ${FREE_MB} * 1024 * 1024 ))
         if [ ${TS_TUNE_MEMORY} -gt ${FREE_BYTES} ]; then
