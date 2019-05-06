@@ -1,5 +1,5 @@
 ARG PG_VERSION_TAG
-FROM timescale/timescaledb:1.2.2-${PG_VERSION_TAG}
+FROM timescale/timescaledb:1.3.0-${PG_VERSION_TAG}
 
 MAINTAINER Timescale https://www.timescale.com
 ARG POSTGIS_VERSION
