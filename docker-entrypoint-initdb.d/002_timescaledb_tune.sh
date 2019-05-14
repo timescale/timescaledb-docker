@@ -4,17 +4,17 @@ NO_TS_TUNE=${NO_TS_TUNE:-""}
 TS_TUNE_MEMORY=${TS_TUNE_MEMORY:-""}
 TS_TUNE_NUM_CPUS=${TS_TUNE_NUM_CPUS:-""}
 
-if [ ! -z "${NO_TS_TUNE}" ]; then
+if [ ! -z "${NO_TS_TUNE:-}" ]; then
     # The user has explicitly requested not to run timescaledb-tune; exit this script
     exit 0
 fi
 
 
-if [ -z "${PGDATA}" ] && [ ! -z "${BITNAMI_IMAGE_VERSION}" ]; then
-    PGDATA=${POSTGRESQL_DATA_DIR}
+if [ -z "${POSTGRESQL_CONF_DIR:-}" ]; then
+        POSTGRESQL_CONF_DIR=${PGDATA}
 fi
 
-if [ -z "${TS_TUNE_MEMORY}" ]; then
+if [ -z "${TS_TUNE_MEMORY:-}" ]; then
     # See if we can get the container's total allocated memory from the cgroups metadata
     if [ -f /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
         TS_TUNE_MEMORY=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes)
@@ -44,7 +44,7 @@ if [ -z "${TS_TUNE_MEMORY}" ]; then
     fi
 fi
 
-if [ -z "${TS_TUNE_NUM_CPUS}" ]; then
+if [ -z "${TS_TUNE_NUM_CPUS:-}" ]; then
     # See if we can get the container's available CPUs from the cgroups metadata
     if [ -f /sys/fs/cgroup/cpuset/cpuset.cpus ]; then
         TS_TUNE_NUM_CPUS=$(cat /sys/fs/cgroup/cpuset/cpuset.cpus)
@@ -63,12 +63,12 @@ if [ -z "${TS_TUNE_NUM_CPUS}" ]; then
     fi
 fi
 
-if [ ! -z "${TS_TUNE_MEMORY}" ]; then
+if [ ! -z "${TS_TUNE_MEMORY:-}" ]; then
     TS_TUNE_MEMORY_FLAGS=--memory="${TS_TUNE_MEMORY}"
 fi
 
-if [ ! -z "${TS_TUNE_NUM_CPUS}" ]; then
+if [ ! -z "${TS_TUNE_NUM_CPUS:-}" ]; then
     TS_TUNE_NUM_CPUS_FLAGS=--cpus=${TS_TUNE_NUM_CPUS}
 fi
 
-/usr/local/bin/timescaledb-tune --quiet --yes --conf-path="${PGDATA}/postgresql.conf" ${TS_TUNE_MEMORY_FLAGS} ${TS_TUNE_NUM_CPUS_FLAGS}
+/usr/local/bin/timescaledb-tune --quiet --yes --conf-path="${POSTGRESQL_CONF_DIR}/postgresql.conf" ${TS_TUNE_MEMORY_FLAGS} ${TS_TUNE_NUM_CPUS_FLAGS}
