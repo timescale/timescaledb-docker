@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ -z "${PGDATA}" ] && [ ! -z "${BITNAMI_IMAGE_VERSION}" ]; then
-	PGDATA=${POSTGRESQL_DATA_DIR}
+if [ -z "${POSTGRESQL_CONF_DIR:-}" ]; then
+        POSTGRESQL_CONF_DIR=${PGDATA}
 fi
 
 # reenable password authentication
-sed -i "s/host all all all trust/host all all all md5/" "${PGDATA}/pg_hba.conf"
+sed -i "s/host all all all trust/host all all all md5/" "${POSTGRESQL_CONF_DIR}/pg_hba.conf"
