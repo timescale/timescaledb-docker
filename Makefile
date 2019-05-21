@@ -1,6 +1,6 @@
 NAME=timescaledb
 ORG=timescale
-PG_VER=pg10
+PG_VER=pg11
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 VERSION=$(shell awk '/^ENV TIMESCALEDB_VERSION/ {print $$3}' Dockerfile)
 
@@ -13,9 +13,6 @@ default: image
 
 .build_$(VERSION)_$(PG_VER): Dockerfile
 	docker build --build-arg PG_VERSION=$(PG_VER_NUMBER) -t $(ORG)/$(NAME):latest-$(PG_VER) .
-ifeq ($(PG_VER),pg9.6)
-	docker tag $(ORG)/$(NAME):latest-$(PG_VER) $(ORG)/$(NAME):latest
-endif
 	docker tag $(ORG)/$(NAME):latest-$(PG_VER) $(ORG)/$(NAME):$(VERSION)-$(PG_VER)
 	touch .build_$(VERSION)_$(PG_VER)
 
@@ -26,9 +23,6 @@ oss: .build_$(VERSION)_$(PG_VER)_oss
 push: image
 	docker push $(ORG)/$(NAME):$(VERSION)-$(PG_VER)
 	docker push $(ORG)/$(NAME):latest-$(PG_VER)
-ifeq ($(PG_VER),pg9.6)
-	docker push $(ORG)/$(NAME):latest
-endif
 
 push-oss: oss
 	docker push $(ORG)/$(NAME):$(VERSION)-$(PG_VER)-oss
