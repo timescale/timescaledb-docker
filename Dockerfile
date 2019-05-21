@@ -2,7 +2,8 @@ ARG PG_VERSION
 ############################
 # Build tools binaries in separate image
 ############################
-FROM golang:alpine AS tools
+ARG GO_VERSION=1.12.5
+FROM golang:${GO_VERSION}-alpine AS tools
 
 ENV TOOLS_VERSION 0.6.0
 
@@ -79,7 +80,7 @@ RUN \
     rm -f $(pg_config --sharedir)/extension/timescaledb--*--*.sql \
     && rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql \
     # Remove all but the last several versiosn ()
-    && KEEP_NUM_VERSIONS=8   # This number should be reduced to 5 eventually \
+    && KEEP_NUM_VERSIONS=7   # This number should be reduced to 5 eventually \
     && rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-*.so | head -n -${KEEP_NUM_VERSIONS}) \
     && rm -f $(ls -1 $(pg_config --sharedir)/extension/timescaledb-*.sql | head -n -${KEEP_NUM_VERSIONS}) \
     # Clean up the rest of the image
