@@ -57,8 +57,6 @@ RUN set -ex \
 #####
 # Add the latest previous version to the end of the list for each new build
 #####
-RUN OLD_VERSION=1.0.0 /build/timescaledb/build_old.sh
-RUN OLD_VERSION=1.0.1 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.1.0 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.1.1 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.2.0 /build/timescaledb/build_old.sh
@@ -72,7 +70,7 @@ RUN \
     && rm -f $(pg_config --sharedir)/extension/timescaledb--*--*.sql \
     && rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql \
     # Remove all but the last several versiosn ()
-    && KEEP_NUM_VERSIONS=5   # This number should be reduced to 5 eventually \
+    && KEEP_NUM_VERSIONS=5 \
     && rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-*.so | head -n -${KEEP_NUM_VERSIONS}) \
     && rm -f $(ls -1 $(pg_config --sharedir)/extension/timescaledb-*.sql | head -n -${KEEP_NUM_VERSIONS}) \
     # Clean up the rest of the image
