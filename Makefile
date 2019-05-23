@@ -1,8 +1,8 @@
-NAME=timescaledb
-ORG=timescale
-PG_VER=pg10
-PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
-VERSION=$(shell awk '/^ENV TIMESCALEDB_VERSION/ {print $$3}' Dockerfile)
+NAME?=timescaledb
+ORG?=timescale
+PG_VER?=pg10
+PG_VER_NUMBER?=$(shell echo $(PG_VER) | cut -c3-)
+VERSION?=$(shell awk '/^ENV TIMESCALEDB_VERSION/ {print $$3}' Dockerfile)
 
 default: image
 
