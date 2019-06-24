@@ -2,7 +2,7 @@ ARG PG_VERSION
 ############################
 # Build tools binaries in separate image
 ############################
-ARG GO_VERSION=1.12.5
+ARG GO_VERSION=1.12.6
 FROM golang:${GO_VERSION}-alpine AS tools
 
 ENV TOOLS_VERSION 0.6.0
@@ -64,6 +64,7 @@ RUN OLD_VERSION=1.2.0 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.2.1 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.2.2 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.3.0 /build/timescaledb/build_old.sh
+RUN OLD_VERSION=1.3.1 /build/timescaledb/build_old.sh
 
 # Cleanup
 RUN \
@@ -103,7 +104,7 @@ ARG PG_VERSION
 
 MAINTAINER Timescale https://www.timescale.com
 
-ENV TIMESCALEDB_VERSION 1.3.1
+ENV TIMESCALEDB_VERSION 1.3.2
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
