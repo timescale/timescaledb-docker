@@ -105,7 +105,7 @@ ARG PG_VERSION
 
 MAINTAINER Timescale https://www.timescale.com
 
-ENV TIMESCALEDB_VERSION 1.4.0
+ENV TIMESCALEDB_VERSION 1.4.1
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/

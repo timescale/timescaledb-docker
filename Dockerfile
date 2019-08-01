@@ -58,7 +58,6 @@ RUN set -ex \
 #####
 # Add the latest previous version to the end of the list for each new build
 #####
-RUN OLD_VERSION=1.1.0 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.1.1 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.2.0 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.2.1 /build/timescaledb/build_old.sh
@@ -66,6 +65,7 @@ RUN OLD_VERSION=1.2.2 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.3.0 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.3.1 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.3.2 /build/timescaledb/build_old.sh
+RUN OLD_VERSION=1.4.0 /build/timescaledb/build_old.sh
 
 # Cleanup
 RUN \
@@ -91,7 +91,7 @@ ARG OSS_ONLY
 MAINTAINER Timescale https://www.timescale.com
 
 # Update list above to include previous versions when changing this
-ENV TIMESCALEDB_VERSION 1.4.0
+ENV TIMESCALEDB_VERSION 1.4.1
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
