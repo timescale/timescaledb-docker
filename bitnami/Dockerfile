@@ -66,6 +66,7 @@ RUN OLD_VERSION=1.2.2 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.3.0 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.3.1 /build/timescaledb/build_old.sh
 RUN OLD_VERSION=1.3.2 /build/timescaledb/build_old.sh
+RUN OLD_VERSION=1.4.0 /build/timescaledb/build_old.sh
 
 # Cleanup
 RUN \
