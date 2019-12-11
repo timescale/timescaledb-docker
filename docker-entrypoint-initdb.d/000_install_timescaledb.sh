@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Don't run on slaves
-if [ "${POSTGRESQL_REPLICATION_MODE:-master}" != "master" ]; then
+if [ "${POSTGRES_REPLICATION_MODE:-master}" != "master" ]; then
 	exit 0
 fi
 
