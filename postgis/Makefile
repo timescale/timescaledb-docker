@@ -6,7 +6,7 @@ VERSION=$(shell awk -F ':' '/^FROM/ { print $$2 }' Dockerfile | sed "s/\(.*\)-.*
 default: image
 
 .build_postgis_$(VERSION)_$(PG_VER): Dockerfile
-	docker build --build-arg POSTGIS_VERSION=2.5.2 --build-arg PG_VERSION_TAG=$(PG_VER) -t $(ORG)/$(NAME):latest-$(PG_VER) .
+	docker build --build-arg POSTGIS_VERSION=2.5.3 --build-arg PG_VERSION_TAG=$(PG_VER) -t $(ORG)/$(NAME):latest-$(PG_VER) .
 	docker tag $(ORG)/$(NAME):latest-$(PG_VER) $(ORG)/$(NAME):$(VERSION)-$(PG_VER)
 	touch .build_postgis_$(VERSION)_$(PG_VER)
 
