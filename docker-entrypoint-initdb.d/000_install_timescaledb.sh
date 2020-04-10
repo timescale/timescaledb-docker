@@ -2,6 +2,15 @@
 
 # Checks to support bitnami image with same scripts so they stay in sync
 if [ ! -z "${BITNAMI_IMAGE_VERSION:-}" ]; then
+	if [ -z "${POSTGRES_REPLICATION_MODE:-}" ]; then
+		POSTGRES_REPLICATION_MODE=${POSTGRESQL_REPLICATION_MODE}
+	fi
+
+	if [ "${POSTGRES_REPLICATION_MODE:-}" == "slave" ]; then
+		echo "exit $0 in slave mode"
+		exit 0
+	fi
+
 	if [ -z "${POSTGRES_USER:-}" ]; then
 		POSTGRES_USER=${POSTGRESQL_USERNAME}
 	fi

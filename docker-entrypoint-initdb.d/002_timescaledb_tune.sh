@@ -1,5 +1,17 @@
 #!/bin/bash
 
+if [ ! -z "${BITNAMI_IMAGE_VERSION:-}" ]; then
+	if [ -z "${POSTGRES_REPLICATION_MODE:-}" ]; then
+		POSTGRES_REPLICATION_MODE=${POSTGRESQL_REPLICATION_MODE}
+	fi
+
+	if [ "${POSTGRES_REPLICATION_MODE:-}" == "slave" ]; then
+		echo "exit $0 in slave mode"
+		exit 0
+	fi
+fi
+
+
 NO_TS_TUNE=${NO_TS_TUNE:-""}
 TS_TUNE_MEMORY=${TS_TUNE_MEMORY:-""}
 TS_TUNE_NUM_CPUS=${TS_TUNE_NUM_CPUS:-""}
