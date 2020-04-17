@@ -3,7 +3,7 @@ FROM timescale/timescaledb:1.7.0-${PG_VERSION_TAG}
 
 MAINTAINER Timescale https://www.timescale.com
 ARG POSTGIS_VERSION
-ENV POSTGIS_VERSION ${POSTGIS_VERSION:-2.5.3}
+ENV POSTGIS_VERSION ${POSTGIS_VERSION:-3.0.1}
 
 RUN set -ex \
     && apk add --no-cache --virtual .fetch-deps \
