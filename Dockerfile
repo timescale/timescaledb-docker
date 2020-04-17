@@ -1,13 +1,13 @@
 ARG PG_VERSION
-ARG PREV_TS_VERSION=1.6.0
+ARG PREV_TS_VERSION=1.6.1
 ARG PREV_EXTRA
 ############################
 # Build tools binaries in separate image
 ############################
-ARG GO_VERSION=1.14.0
+ARG GO_VERSION=1.14.2
 FROM golang:${GO_VERSION}-alpine AS tools
 
-ENV TOOLS_VERSION 0.8.0
+ENV TOOLS_VERSION 0.8.1
 
 RUN apk update && apk add --no-cache git \
     && mkdir -p ${GOPATH}/src/github.com/timescale/ \
@@ -47,7 +47,7 @@ ARG OSS_ONLY
 MAINTAINER Timescale https://www.timescale.com
 
 # Update list above to include previous versions when changing this
-ENV TIMESCALEDB_VERSION 1.6.1
+ENV TIMESCALEDB_VERSION 1.7.0
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/

@@ -51,11 +51,11 @@ To specify your own limits, use the `TS_TUNE_MEMORY` and `TS_TUNE_NUM_CPUS`
 environment variables at runtime:
 
 ```
-$ docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e TS_TUNE_MEMORY=4GB -e TS_TUNE_NUM_CPUS=4 timescale/timescaledb:latest-pg11
+$ docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e TS_TUNE_MEMORY=4GB -e TS_TUNE_NUM_CPUS=4 timescale/timescaledb:latest-pg12
 ```
 
 To not run `timescaledb-tune` at all, use the `NO_TS_TUNE` environment variable:
 
 ```
-$ docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e NO_TS_TUNE=true timescale/timescaledb:latest-pg11
+$ docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e NO_TS_TUNE=true timescale/timescaledb:latest-pg12
 ```
