@@ -1,6 +1,6 @@
 NAME=timescaledb
 ORG=timescale
-PG_VER=pg11
+PG_VER=pg12
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 VERSION=$(shell awk '/^ENV TIMESCALEDB_VERSION/ {print $$3}' Dockerfile)
 PLATFORM=linux/amd64,linux/arm/v7,linux/arm/v6,linux/386,linux/arm64
@@ -49,8 +49,10 @@ multi: .multi_$(VERSION)_$(PG_VER)
 
 multi-oss: .multi_$(VERSION)_$(PG_VER)_oss
 
+all: multi multi-oss
+
 clean:
 	rm -f *~ .build_* .multi_*
 	docker buildx rm multibuild
 
-.PHONY: default image push push-oss oss multi multi-oss clean
+.PHONY: default image push push-oss oss multi multi-oss clean all

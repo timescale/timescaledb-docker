@@ -1,6 +1,6 @@
 NAME=timescaledb
 ORG=timescale
-PG_VER=pg11
+PG_VER=pg12
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 VERSION=$(shell awk '/^ENV TIMESCALEDB_VERSION/ {print $$3}' Dockerfile)
 

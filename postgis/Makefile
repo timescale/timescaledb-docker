@@ -1,6 +1,6 @@
 NAME=timescaledb-postgis
 ORG=timescale
-PG_VER=pg11
+PG_VER=pg12
 VERSION=$(shell awk -F ':' '/^FROM/ { print $$2 }' Dockerfile | sed "s/\(.*\)-.*/\1/")
 
 default: image
