@@ -49,8 +49,10 @@ multi: .multi_$(VERSION)_$(PG_VER)
 
 multi-oss: .multi_$(VERSION)_$(PG_VER)_oss
 
+all: multi multi-oss
+
 clean:
 	rm -f *~ .build_* .multi_*
 	docker buildx rm multibuild
 
-.PHONY: default image push push-oss oss multi multi-oss clean
+.PHONY: default image push push-oss oss multi multi-oss clean all
