@@ -37,7 +37,7 @@ default: image
 	touch .build_$(VERSION)_$(PG_VER)_oss
 
 .build_$(VERSION)_$(PG_VER)_debian: Dockerfile
-	docker build --build-arg PG_VERSION=$(PG_VER_NUMBER) -t $(ORG)/$(NAME):latest-$(PG_VER)-debian -f debian.Dockerfile .
+	docker build --build-arg PREV_EXTRA="-debian" --build-arg PG_VERSION=$(PG_VER_NUMBER) -t $(ORG)/$(NAME):latest-$(PG_VER)-debian -f debian.Dockerfile .
 	docker tag $(ORG)/$(NAME):latest-$(PG_VER)-debian $(ORG)/$(NAME):$(VERSION)-$(PG_VER)-debian
 	touch .build_$(VERSION)_$(PG_VER)_debian
 
