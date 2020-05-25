@@ -3,7 +3,7 @@ ORG=timescale
 PG_VER=pg12
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 VERSION=$(shell awk '/^ENV TIMESCALEDB_VERSION/ {print $$3}' Dockerfile)
-PLATFORM=linux/amd64,linux/arm/v7,linux/arm/v6,linux/386,linux/arm64
+PLATFORM=linux/amd64,linux/arm/v7,linux/arm64
 
 default: image
 
