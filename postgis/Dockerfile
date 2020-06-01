@@ -1,7 +1,7 @@
 ARG PG_VERSION_TAG
 FROM timescale/timescaledb:1.7.1-${PG_VERSION_TAG}
 
-MAINTAINER Timescale https://www.timescale.com
+LABEL maintainer="Timescale https://www.timescale.com"
 ARG POSTGIS_VERSION
 ENV POSTGIS_VERSION ${POSTGIS_VERSION:-2.5.3}
 

@@ -1,5 +1,7 @@
 NAME=timescaledb-postgis
-ORG=timescale
+# Default is to timescaledev to avoid unexpected push to the main repo
+# Set ORG to timescale in the caller
+ORG=timescaledev
 PG_VER=pg12
 VERSION=$(shell awk -F ':' '/^FROM/ { print $$2 }' Dockerfile | sed "s/\(.*\)-.*/\1/")
 
