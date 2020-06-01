@@ -44,7 +44,7 @@ ARG PG_VERSION
 FROM bitnami/postgresql:${PG_VERSION}
 ARG PG_VERSION
 
-MAINTAINER Timescale https://www.timescale.com
+LABEL maintainer="Timescale https://www.timescale.com"
 
 # Update list above to include previous versions when changing this
 ENV TIMESCALEDB_VERSION 1.7.1

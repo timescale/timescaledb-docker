@@ -1,14 +1,16 @@
 NAME=timescaledb
-ORG=timescale
+# Default is to timescaledev to avoid unexpected push to the main repo
+# Set ORG to timescale in the caller
+ORG=timescaledev 
 PG_VER=pg12
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 VERSION=$(shell awk '/^ENV TIMESCALEDB_VERSION/ {print $$3}' Dockerfile)
-PLATFORM=linux/amd64,linux/arm/v7,linux/arm/v6,linux/386,linux/arm64
+PLATFORM=linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
 default: image
 
 .multi_$(VERSION)_$(PG_VER)_oss: Dockerfile
-	docker buildx create --name multibuild --use
+	docker buildx create --platform $(PLATFORM) --name multibuild --use
 	docker buildx inspect multibuild --bootstrap
 	docker buildx build --platform $(PLATFORM) --build-arg PREV_EXTRA="-oss" --build-arg OSS_ONLY=" -DAPACHE_ONLY=1" --build-arg PG_VERSION=$(PG_VER_NUMBER) \
 		-t $(ORG)/$(NAME):latest-$(PG_VER)-oss -t $(ORG)/$(NAME):$(VERSION)-$(PG_VER)-oss --push .
@@ -16,7 +18,7 @@ default: image
 	docker buildx rm multibuild
 
 .multi_$(VERSION)_$(PG_VER): Dockerfile
-	docker buildx create --name multibuild --use
+	docker buildx create --platform $(PLATFORM) --name multibuild --use
 	docker buildx inspect multibuild --bootstrap
 	docker buildx build --platform $(PLATFORM) --build-arg PG_VERSION=$(PG_VER_NUMBER) \
 		-t $(ORG)/$(NAME):latest-$(PG_VER) -t $(ORG)/$(NAME):$(VERSION)-$(PG_VER) --push .
