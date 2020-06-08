@@ -24,11 +24,9 @@ jobs:
 
     - name: Set up Docker Buildx
       id: buildx
-      uses: crazy-max/ghaction-docker-buildx@v2
+      uses: crazy-max/ghaction-docker-buildx@v2.0.0
       with:
-        buildx-version: latest
         skip-cache: false
-        qemu-version: latest
 
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
@@ -45,6 +43,7 @@ jobs:
   timescaledb-bitnami:
 
     name: PG${{ matrix.pg }}-bitnami
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     strategy: 
       matrix:
