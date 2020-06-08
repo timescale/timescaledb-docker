@@ -43,7 +43,6 @@ jobs:
   timescaledb-bitnami:
 
     name: PG${{ matrix.pg }}-bitnami
-    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     strategy: 
       matrix:
