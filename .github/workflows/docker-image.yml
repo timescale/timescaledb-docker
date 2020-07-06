@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy: 
       matrix:
-        pg: [ 11, 12 ]
+        pg: [ 9.6, 10, 11, 12 ]
         oss: [ "", "-oss" ]
 
     steps:
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy: 
       matrix:
-        pg: [ 11, 12 ]
+        pg: [ 9.6, 10, 11, 12 ]
 
     steps:
     - uses: actions/checkout@v2
@@ -68,7 +68,7 @@ jobs:
     needs: timescaledb
     strategy: 
       matrix:
-        pg: [ 11, 12 ]
+        pg: [ 9.6, 10, 11, 12 ]
 
     steps:
     - uses: actions/checkout@v2
