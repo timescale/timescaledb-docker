@@ -6,7 +6,7 @@ on:
 
 env:
   ORG: timescale # timescaledev
-  
+
 jobs:
 
   # Build multi-arch TimescaleDB images for both TSL and OSS code.
@@ -14,7 +14,8 @@ jobs:
 
     name: PG${{ matrix.pg }}${{ matrix.oss }}
     runs-on: ubuntu-latest
-    strategy: 
+    strategy:
+      fail-fast: false
       matrix:
         pg: [ 9.6, 10, 11, 12 ]
         oss: [ "", "-oss" ]
@@ -25,8 +26,6 @@ jobs:
     - name: Set up Docker Buildx
       id: buildx
       uses: crazy-max/ghaction-docker-buildx@v2.0.0
-      with:
-        skip-cache: false
 
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
@@ -37,14 +36,15 @@ jobs:
     - name: Build and push multi-platform Docker image for TimescaleDB
       run: make multi${{ matrix.oss }} ORG=$ORG PG_VER=pg${{ matrix.pg }}
 
-  # Build bitnami images of TimscaleDB. 
+  # Build bitnami images of TimscaleDB.
   # The images are built only for amd64, since it is the only supported architecture in the base image bitname/postgresql.
   # The images are only built for TSL code.
   timescaledb-bitnami:
 
     name: PG${{ matrix.pg }}-bitnami
     runs-on: ubuntu-latest
-    strategy: 
+    strategy:
+      fail-fast: false
       matrix:
         pg: [ 9.6, 10, 11, 12 ]
 
@@ -66,7 +66,8 @@ jobs:
     name: PG${{ matrix.pg }}-postgis
     runs-on: ubuntu-latest
     needs: timescaledb
-    strategy: 
+    strategy:
+      fail-fast: false
       matrix:
         pg: [ 9.6, 10, 11, 12 ]
 
