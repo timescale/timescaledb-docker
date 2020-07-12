@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Don't run on slaves
+if [ "${POSTGRES_REPLICATION_MODE:-master}" != "master" ]; then
+	exit 0
+fi
+
 # Checks to support bitnami image with same scripts so they stay in sync
 if [ ! -z "${BITNAMI_IMAGE_VERSION:-}" ]; then
 	if [ -z "${POSTGRES_USER:-}" ]; then
