@@ -1,5 +1,5 @@
 ARG PG_VERSION
-ARG PREV_TS_VERSION=1.7.1
+ARG PREV_TS_VERSION=1.7.2
 ARG PREV_EXTRA
 ############################
 # Build tools binaries in separate image
