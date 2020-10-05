@@ -13,7 +13,7 @@ TAG=-t $(TAG_VERSION) $(if $(BETA),,-t $(TAG_LATEST))
 default: image
 
 .build_postgis_$(VERSION)_$(PG_VER): Dockerfile
-	docker build --build-arg POSTGIS_VERSION=2.5.3 --build-arg PG_VERSION_TAG=$(PG_VER) $(TAG) .
+	docker build --build-arg POSTGIS_VERSION=2.5.5 --build-arg PG_VERSION_TAG=$(PG_VER) $(TAG) .
 	touch .build_postgis_$(VERSION)_$(PG_VER)
 
 image: .build_postgis_$(VERSION)_$(PG_VER)
