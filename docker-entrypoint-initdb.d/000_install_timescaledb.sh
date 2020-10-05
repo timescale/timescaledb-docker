@@ -32,7 +32,7 @@ if [ "${TIMESCALEDB_TELEMETRY:-}" == "off" ]; then
 	# We delete the job as well to ensure that we do not spam the
 	# log with other messages related to the Telemetry job.
 	cat <<EOF >>${create_sql}
-DELETE FROM _timescaledb_config.bgw_job WHERE job_type = 'telemetry_and_version_check_if_enabled';
+SELECT alter_job(1,scheduled:=false);
 EOF
 fi
 
