@@ -6,7 +6,7 @@ PG_VER=pg12
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 VERSION=$(shell awk '/^ENV TIMESCALEDB_VERSION/ {print $$3}' Dockerfile)
 # Beta releases should not be tagged as latest, so BETA is used to track.
-BETA=$(findstring beta,$(VERSION))
+BETA=$(findstring -,$(VERSION))
 TAG_VERSION=$(ORG)/$(NAME):$(VERSION)-$(PG_VER)-bitnami
 TAG_LATEST=$(ORG)/$(NAME):latest-$(PG_VER)-bitnami
 TAG=-t $(TAG_VERSION) $(if $(BETA),,-t $(TAG_LATEST))
