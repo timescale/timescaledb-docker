@@ -47,7 +47,7 @@ ARG OSS_ONLY
 LABEL maintainer="Timescale https://www.timescale.com"
 
 # Update list above to include previous versions when changing this
-ENV TIMESCALEDB_VERSION 2.0.0-beta6
+ENV TIMESCALEDB_VERSION 2.0.0-rc1
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
