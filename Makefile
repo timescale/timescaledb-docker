@@ -6,7 +6,7 @@ PG_VER=pg12
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 VERSION=$(shell awk '/^ENV TIMESCALEDB_VERSION/ {print $$3}' Dockerfile)
 # Beta releases should not be tagged as latest, so BETA is used to track.
-BETA=$(findstring -,$(VERSION))
+BETA=$(findstring rc,$(VERSION))
 PLATFORM=linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 # PUSH_MULTI can be set to nothing for dry-run without pushing during multi-arch build
 PUSH_MUTLI=--push

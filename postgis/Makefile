@@ -5,7 +5,7 @@ ORG=timescaledev
 PG_VER=pg12
 VERSION=$(shell awk -F ':' '/^FROM/ { print $$2 }' Dockerfile | sed "s/\(.*\)-.*/\1/")
 # Beta releases should not be tagged as latest, so BETA is used to track.
-BETA=$(findstring -,$(VERSION))
+BETA=$(findstring rc,$(VERSION))
 TAG_VERSION=$(ORG)/$(NAME):$(VERSION)-$(PG_VER)
 TAG_LATEST=$(ORG)/$(NAME):latest-$(PG_VER)
 TAG=-t $(TAG_VERSION) $(if $(BETA),,-t $(TAG_LATEST))
