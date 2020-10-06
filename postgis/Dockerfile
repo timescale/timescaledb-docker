@@ -29,9 +29,6 @@ RUN set -ex \
         llvm \
         clang \
         clang-dev \
-    && apk add --no-cache --virtual .build-deps-edge \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
         g++ \
         gdal-dev \
         geos-dev \
@@ -49,9 +46,6 @@ RUN set -ex \
     && make -s install \
     && apk add --no-cache --virtual .postgis-rundeps \
         json-c \
-    && apk add --no-cache --virtual .postgis-rundeps-edge \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
         geos \
         gdal \
         proj \
@@ -59,4 +53,4 @@ RUN set -ex \
         libstdc++ \
     && cd / \
     && rm -rf /tmp/postgis-${POSTGIS_VERSION} \
-    && apk del .fetch-deps .build-deps .build-deps-edge
+    && apk del .fetch-deps .build-deps
