@@ -33,9 +33,9 @@ FROM timescale/timescaledb:${PREV_TS_VERSION}-pg${PG_VERSION}${PREV_EXTRA} AS ol
 # Remove update files, mock files, and all but the last 5 .so/.sql files
 RUN rm -f $(pg_config --sharedir)/extension/timescaledb--*--*.sql \
     && rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql \
-    && rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-tsl-*.so | head -n -5) \
+    && rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-tsl-1*.so | head -n -5) \
     && rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-1*.so | head -n -5) \
-    && rm -f $(ls -1 $(pg_config --sharedir)/extension/timescaledb-*.sql | head -n -5)
+    && rm -f $(ls -1 $(pg_config --sharedir)/extension/timescaledb--1*.sql | head -n -5)
 
 ############################
 # Now build image and copy in tools
