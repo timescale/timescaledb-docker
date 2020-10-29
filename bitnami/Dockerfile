@@ -96,6 +96,6 @@ RUN set -ex \
         /var/lib/apt/lists/* \
         /tmp/*               \
         /var/tmp/*
-RUN sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'timescaledb,\2'/;s/,'/'/" /opt/bitnami/postgresql/share/postgresql.conf.sample
+RUN sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'timescaledb,\2'/;s/,'/'/" /opt/bitnami/postgresql/share/postgresql.conf.sample /opt/bitnami/postgresql/conf/postgresql.conf
 
 USER 1001
