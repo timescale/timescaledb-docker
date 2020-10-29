@@ -2,7 +2,8 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ master, dev-build ]
+    branches:
+      - 1.7.x
 
 env:
   ORG: timescale # timescaledev
@@ -17,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [ 11, 12 ]
+        pg: [ 9.6, 10, 11, 12 ]
         oss: [ "", "-oss" ]
 
     steps:
@@ -46,7 +47,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [ 11, 12 ]
+        pg: [ 9.6, 10, 11, 12 ]
 
     steps:
     - uses: actions/checkout@v2
@@ -69,7 +70,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [ 11, 12 ]
+        pg: [ 9.6, 10, 11, 12 ]
 
     steps:
     - uses: actions/checkout@v2
