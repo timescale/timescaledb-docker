@@ -12,7 +12,7 @@ This image is based on the
 official
 [Postgres docker image](https://store.docker.com/images/postgres) so
 the documentation for that image also applies here, including the
-environment variables one can set, extensibility, etc. 
+environment variables one can set, extensibility, etc.
 
 ### Starting a TimescaleDB instance
 
@@ -52,6 +52,12 @@ environment variables at runtime:
 
 ```
 $ docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e TS_TUNE_MEMORY=4GB -e TS_TUNE_NUM_CPUS=4 timescale/timescaledb:latest-pg11
+```
+
+To specify a maximum number of [background workers](https://docs.timescale.com/getting-started/configuring#workers), use the `TS_TUNE_MAX_BG_WORKERS` environment variable:
+
+```
+$ docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e TS_TUNE_MAX_BG_WORKERS=16 timescale/timescaledb:latest-pg11
 ```
 
 To not run `timescaledb-tune` at all, use the `NO_TS_TUNE` environment variable:
