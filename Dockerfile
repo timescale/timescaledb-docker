@@ -26,12 +26,13 @@ RUN apk update && apk add --no-cache git \
     && go get -d -v \
     && go build -o /go/bin/timescaledb-parallel-copy \
     # Build timescaledb-backup (ts_backup/ts_restore)
-    && cd ${GOPATH}/src/github.com/timescale/timescaledb-backup/cmd/ts-dump/ \
+    && cd ${GOPATH}/src/github.com/timescale/timescaledb-backup/ \
     && git fetch && git checkout --quiet $(git describe --abbrev=0) \
-    && go get -d -v \
     && cd ${GOPATH}/src/github.com/timescale/timescaledb-backup/cmd/ts-dump/ \
+    && go get -d -v \
     && go build -o /go/bin/ts-dump \
     && cd ${GOPATH}/src/github.com/timescale/timescaledb-backup/cmd/ts-restore/ \
+    && go get -d -v \
     && go build -o /go/bin/ts-restore
 
 ############################
