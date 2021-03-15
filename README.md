@@ -60,6 +60,12 @@ To specify a maximum number of [background workers](https://docs.timescale.com/g
 $ docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e TS_TUNE_MAX_BG_WORKERS=16 timescale/timescaledb:latest-pg11
 ```
 
+To specify a [maximum number of connections](https://www.postgresql.org/docs/current/runtime-config-connection.html), use the `TS_TUNE_MAX_CONNS` environment variable:
+
+```
+$ docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e TS_TUNE_MAX_CONNS=200 timescale/timescaledb:latest-pg11
+```
+
 To not run `timescaledb-tune` at all, use the `NO_TS_TUNE` environment variable:
 
 ```
