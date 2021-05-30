@@ -3,6 +3,7 @@ NAME=timescaledb-postgis
 # Set ORG to timescale in the caller
 ORG=timescaledev
 PG_VER=pg12
+POSTGIS_VERSION=2.5.5
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 VERSION=$(shell awk -F ':' '/^FROM/ { print $$2 }' Dockerfile | sed "s/\(.*\)-.*/\1/")
 # Beta releases should not be tagged as latest, so BETA is used to track.
@@ -19,13 +20,13 @@ default: image
 .multi_postgis_$(VERSION)_$(PG_VER): Dockerfile
 	docker buildx create --platform $(PLATFORM) --name multibuild --use
 	docker buildx inspect multibuild --bootstrap
-	docker buildx build --platform $(PLATFORM) --build-arg PG_VERSION=$(PG_VER_NUMBER) \
-		$(TAG) $(PUSH_MUTLI) .
+	docker buildx build --platform $(PLATFORM) --build-arg PG_VERSION_TAG=$(PG_VER_NUMBER) \
+		--build-arg POSTGIS_VERSION=$(POSTGIS_VERSION) $(TAG) $(PUSH_MUTLI) .
 	touch .multi_$(VERSION)_$(PG_VER)
 	docker buildx rm multibuild
 
 .build_postgis_$(VERSION)_$(PG_VER): Dockerfile
-	docker build --build-arg POSTGIS_VERSION=2.5.5 --build-arg PG_VERSION_TAG=$(PG_VER) $(TAG) .
+	docker build --build-arg POSTGIS_VERSION=$(POSTGIS_VERSION) --build-arg PG_VERSION_TAG=$(PG_VER) $(TAG) .
 	touch .build_postgis_$(VERSION)_$(PG_VER)
 
 image: .build_postgis_$(VERSION)_$(PG_VER)
@@ -40,7 +41,7 @@ multi: .multi_postgis_$(VERSION)_$(PG_VER)
 
 
 clean:
-	rm -f *~ .build_postgis_* .multi_*
+	rm -f *~ .build_postgis_* .multi_postgis_*
 	docker buildx rm multibuild
 
 .PHONY: default image push multi clean
