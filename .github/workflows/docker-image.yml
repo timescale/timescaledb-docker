@@ -97,3 +97,4 @@ jobs:
 
     - name: Build and push multi-platform Docker image for TimescaleDB-postgis
       run: make multi${{ matrix.oss }} ORG=$ORG PG_VER=pg${{ matrix.pg }}
+      working-directory: postgis
