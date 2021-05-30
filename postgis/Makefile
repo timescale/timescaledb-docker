@@ -20,7 +20,7 @@ default: image
 .multi_postgis_$(VERSION)_$(PG_VER): Dockerfile
 	docker buildx create --platform $(PLATFORM) --name multibuild --use
 	docker buildx inspect multibuild --bootstrap
-	docker buildx build --platform $(PLATFORM) --build-arg PG_VERSION_TAG=$(PG_VER_NUMBER) \
+	docker buildx build --platform $(PLATFORM) --build-arg PG_VERSION_TAG=$(PG_VER) \
 		--build-arg POSTGIS_VERSION=$(POSTGIS_VERSION) $(TAG) $(PUSH_MUTLI) .
 	touch .multi_$(VERSION)_$(PG_VER)
 	docker buildx rm multibuild
