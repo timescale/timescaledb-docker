@@ -2,10 +2,10 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ master, dev-build ]
+    branches: [ release_docker, dev-build ]
 
 env:
-  ORG: timescale # timescaledev
+  ORG: timescale #timescaledev
 
 jobs:
 
