@@ -17,12 +17,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [ 11, 12, 13 ]
+        pg: [ 12, 13 ]
         oss: [ "", "-oss" ]
 
     steps:
     - uses: actions/checkout@v2
-      
+
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
       with:
@@ -51,7 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [ 11, 12, 13 ]
+        pg: [ 12, 13 ]
 
     steps:
     - uses: actions/checkout@v2
@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [ 11, 12, 13 ]
+        pg: [ 12, 13 ]
 
     steps:
     - uses: actions/checkout@v2
