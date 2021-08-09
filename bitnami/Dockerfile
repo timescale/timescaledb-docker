@@ -1,5 +1,6 @@
 ARG PG_VERSION
-ARG PREV_TS_VERSION=2.3.1
+ARG TS_VERSION
+ARG PREV_TS_VERSION
 ############################
 # Build tools binaries in separate image
 ############################
@@ -28,6 +29,7 @@ RUN apk update && apk add --no-cache git \
 # Grab old versions from previous version
 ############################
 ARG PG_VERSION
+ARG PREV_TS_VERSION
 FROM timescale/timescaledb:${PREV_TS_VERSION}-pg${PG_VERSION}-bitnami AS oldversions
 # Remove update files, mock files, and all but the last 5 .so/.sql files
 USER 0
@@ -46,15 +48,13 @@ ARG PG_VERSION
 
 LABEL maintainer="Timescale https://www.timescale.com"
 
-# Update list above to include previous versions when changing this
-ENV TIMESCALEDB_VERSION 2.4.0
-
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
 COPY --from=oldversions /opt/bitnami/postgresql/lib/timescaledb-*.so /opt/bitnami/postgresql/lib/
 COPY --from=oldversions /opt/bitnami/postgresql/share/extension/timescaledb--*.sql /opt/bitnami/postgresql/share/extension/
 
 USER 0
+ARG TS_VERSION
 RUN set -ex \
     && mkdir -p /var/lib/apt/lists/partial \
     && apt-get update \
@@ -75,7 +75,7 @@ RUN set -ex \
     \
     # Build current version \
     && cd /build/timescaledb && rm -fr build \
-    && git checkout ${TIMESCALEDB_VERSION} \
+    && git checkout ${TS_VERSION} \
     && ./bootstrap -DREGRESS_CHECKS=OFF -DTAP_CHECKS=OFF -DGENERATE_DOWNGRADE_SCRIPT=ON -DWARNINGS_AS_ERRORS=OFF -DPROJECT_INSTALL_METHOD="docker-bitnami" \
     && cd build && make install \
     && cd ~ \

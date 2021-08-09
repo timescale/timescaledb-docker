@@ -1,5 +1,6 @@
 ARG PG_VERSION
-ARG PREV_TS_VERSION=2.3.1
+ARG TS_VERSION
+ARG PREV_TS_VERSION
 ARG PREV_EXTRA
 ############################
 # Build tools binaries in separate image
@@ -29,6 +30,8 @@ RUN apk update && apk add --no-cache git \
 # Grab old versions from previous version
 ############################
 ARG PG_VERSION
+ARG PREV_TS_VERSION
+ARG PREV_EXTRA
 FROM timescale/timescaledb:${PREV_TS_VERSION}-pg${PG_VERSION}${PREV_EXTRA} AS oldversions
 # Remove update files, mock files, and all but the last 5 .so/.sql files
 RUN rm -f $(pg_config --sharedir)/extension/timescaledb--*--*.sql \
@@ -46,14 +49,12 @@ ARG OSS_ONLY
 
 LABEL maintainer="Timescale https://www.timescale.com"
 
-# Update list above to include previous versions when changing this
-ENV TIMESCALEDB_VERSION 2.4.0
-
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
 COPY --from=oldversions /usr/local/lib/postgresql/timescaledb-*.so /usr/local/lib/postgresql/
 COPY --from=oldversions /usr/local/share/postgresql/extension/timescaledb--*.sql /usr/local/share/postgresql/extension/
 
+ARG TS_VERSION
 RUN set -ex \
     && apk add --no-cache --virtual .fetch-deps \
                 ca-certificates \
@@ -75,7 +76,7 @@ RUN set -ex \
     \
     # Build current version \
     && cd /build/timescaledb && rm -fr build \
-    && git checkout ${TIMESCALEDB_VERSION} \
+    && git checkout ${TS_VERSION} \
     && ./bootstrap -DREGRESS_CHECKS=OFF -DTAP_CHECKS=OFF -DGENERATE_DOWNGRADE_SCRIPT=ON -DWARNINGS_AS_ERRORS=OFF -DPROJECT_INSTALL_METHOD="docker"${OSS_ONLY} \
     && cd build && make install \
     && cd ~ \

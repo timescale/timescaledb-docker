@@ -3,13 +3,14 @@ name: Docker Image Nightly Build CI
 on:
   push:
     branches: [ cron_build ]
-  
+
   schedule:
-    # run daily 0:00 
+    # run daily 0:00
     - cron: '0 0 * * *'
 
 env:
   ORG: timescaledev
+  TS_VERSION: master
 
 jobs:
 
@@ -25,17 +26,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      
+
     - name: Set up Docker Buildx
       id: buildx
       uses: docker/setup-buildx-action@v1
 
-    - name: Linux available buildx platforms 
+    - name: Linux available buildx platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
 
     - name: Login to DockerHub Registry
       run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
 
     - name: Build and push nightly Docker image for TimescaleDB
-      run: make nightly ORG=$ORG PG_VER=pg${{ matrix.pg }}
+      run: make nightly ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION
 

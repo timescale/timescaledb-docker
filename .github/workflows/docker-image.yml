@@ -6,6 +6,7 @@ on:
 
 env:
   ORG: timescale #timescaledev
+  TS_VERSION: 2.4.0
 
 jobs:
 
@@ -39,7 +40,7 @@ jobs:
       run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
 
     - name: Build and push multi-platform Docker image for TimescaleDB
-      run: make multi${{ matrix.oss }} ORG=$ORG PG_VER=pg${{ matrix.pg }}
+      run: make multi${{ matrix.oss }} ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION
 
   # Build bitnami images of TimscaleDB.
   # The images are built only for amd64, since it is the only supported architecture in the base image bitname/postgresql.
@@ -60,6 +61,6 @@ jobs:
       run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
 
     - name: Build and push amd64 Docker image for TimescaleDB bitnami
-      run: make push ORG=$ORG PG_VER=pg${{ matrix.pg }}
+      run: make push ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION
       working-directory: bitnami
 
