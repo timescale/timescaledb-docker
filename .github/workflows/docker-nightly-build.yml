@@ -11,6 +11,7 @@ on:
 env:
   ORG: timescaledev
   TS_VERSION: master
+  PLATFORM: linux/amd64
 
 jobs:
 
@@ -38,5 +39,5 @@ jobs:
       run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
 
     - name: Build and push nightly Docker image for TimescaleDB
-      run: make nightly ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION
+      run: make multi ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION PLATFORM=$PLATFORM TAG="-t timescaledev/timescaledb:nightly-pg${{ matrix.pg }}"
 
