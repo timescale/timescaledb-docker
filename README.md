@@ -54,7 +54,7 @@ environment variables at runtime:
 $ docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e TS_TUNE_MEMORY=4GB -e TS_TUNE_NUM_CPUS=4 timescale/timescaledb:latest-pg11
 ```
 
-To specify a maximum number of [background workers](https://docs.timescale.com/getting-started/configuring#workers), use the `TS_TUNE_MAX_BG_WORKERS` environment variable:
+To specify a maximum number of [background workers](https://docs.timescale.com/timescaledb/latest/how-to-guides/configuration/timescaledb-config/#timescaledb-enable-connection-binary-data-bool), use the `TS_TUNE_MAX_BG_WORKERS` environment variable:
 
 ```
 $ docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e TS_TUNE_MAX_BG_WORKERS=16 timescale/timescaledb:latest-pg11
