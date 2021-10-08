@@ -1,13 +1,15 @@
-name: Docker Image CI
-
+name: Release Docker Image
 on:
   push:
     branches: [ release_docker, dev-build ]
-
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
 env:
   ORG: timescale #timescaledev
-  TS_VERSION: 2.4.2
-
+  TS_VERSION: ${{ github.event.inputs.version || '2.4.2' }}
 jobs:
 
   # Build multi-arch TimescaleDB images for both TSL and OSS code.
@@ -20,7 +22,6 @@ jobs:
       matrix:
         pg: [ 12, 13 ]
         oss: [ "", "-oss" ]
-
     steps:
     - uses: actions/checkout@v2
 
