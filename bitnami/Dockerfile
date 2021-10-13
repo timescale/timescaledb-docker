@@ -1,6 +1,6 @@
 ARG PG_VERSION
+ARG PREV_IMAGE
 ARG TS_VERSION
-ARG PREV_TS_VERSION
 ############################
 # Build tools binaries in separate image
 ############################
@@ -29,8 +29,8 @@ RUN apk update && apk add --no-cache git \
 # Grab old versions from previous version
 ############################
 ARG PG_VERSION
-ARG PREV_TS_VERSION
-FROM timescale/timescaledb:${PREV_TS_VERSION}-pg${PG_VERSION}-bitnami AS oldversions
+ARG PREV_IMAGE
+FROM ${PREV_IMAGE} AS oldversions
 # Remove update files, mock files, and all but the last 5 .so/.sql files
 USER 0
 RUN rm -f $(pg_config --sharedir)/extension/timescaledb--*--*.sql \

@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [ 12, 13 ]
+        pg: [12, 13, 14]
         oss: [ "", "-oss" ]
 
     steps:
@@ -40,7 +40,7 @@ jobs:
       run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
 
     - name: Build and push multi-platform Docker image for TimescaleDB
-      run: make multi${{ matrix.oss }} ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION
+      run: make multi${{ matrix.oss }} ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION PREV_EXTRA="${{ matrix.oss }}"
 
   # Build bitnami images of TimscaleDB.
   # The images are built only for amd64, since it is the only supported architecture in the base image bitname/postgresql.
@@ -52,7 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [ 12, 13 ]
+        pg: [12, 13, 14]
 
     steps:
     - uses: actions/checkout@v2
