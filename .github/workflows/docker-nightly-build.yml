@@ -2,7 +2,8 @@ name: Docker Image Nightly Build CI
 
 on:
   push:
-    branches: [ cron_build ]
+    branches:
+      - cron_build
 
   schedule:
     # run daily 0:00
@@ -23,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [12, 13 ]
+        pg: [12, 13, 14]
 
     steps:
     - uses: actions/checkout@v2

@@ -6,6 +6,8 @@ PG_VER=pg12
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 TS_VERSION=master
 PREV_TS_VERSION=$(shell wget --quiet -O - https://raw.githubusercontent.com/timescale/timescaledb/${TS_VERSION}/version.config | grep update_from_version | sed -e 's!update_from_version = !!')
+PREV_TS_IMAGE="timescale/timescaledb:$(PREV_TS_VERSION)-pg$(PG_VER_NUMBER)$(PREV_EXTRA)"
+PREV_IMAGE=$(shell if docker pull $(PREV_TS_IMAGE) >/dev/null; then echo "$(PREV_TS_IMAGE)"; else echo "postgres:$(PG_VER_NUMBER)-alpine"; fi )
 # Beta releases should not be tagged as latest, so BETA is used to track.
 BETA=$(findstring rc,$(TS_VERSION))
 PLATFORM=linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
@@ -26,9 +28,8 @@ default: image
 	docker buildx inspect multibuild --bootstrap
 	docker buildx build --platform $(PLATFORM) \
 		--build-arg TS_VERSION=$(TS_VERSION) \
-		--build-arg PREV_TS_VERSION=$(PREV_TS_VERSION) \
 		--build-arg PG_VERSION=$(PG_VER_NUMBER) \
-		--build-arg PREV_EXTRA="-oss" \
+		--build-arg PREV_IMAGE=$(PREV_IMAGE) \
 		--build-arg OSS_ONLY=" -DAPACHE_ONLY=1" \
 		$(TAG_OSS) $(PUSH_MULTI) .
 	touch .multi_$(TS_VERSION)_$(PG_VER)_oss
@@ -37,18 +38,19 @@ default: image
 .multi_$(TS_VERSION)_$(PG_VER): Dockerfile
 	test -n "$(TS_VERSION)"  # TS_VERSION
 	test -n "$(PREV_TS_VERSION)"  # PREV_TS_VERSION
+	test -n "$(PREV_IMAGE)"  # PREV_IMAGE
 	docker buildx create --platform $(PLATFORM) --name multibuild --use
 	docker buildx inspect multibuild --bootstrap
 	docker buildx build --platform $(PLATFORM) \
 		--build-arg TS_VERSION=$(TS_VERSION) \
-		--build-arg PREV_TS_VERSION=$(PREV_TS_VERSION) \
+		--build-arg PREV_IMAGE=$(PREV_IMAGE) \
 		--build-arg PG_VERSION=$(PG_VER_NUMBER) \
 		$(TAG) $(PUSH_MULTI) .
 	touch .multi_$(TS_VERSION)_$(PG_VER)
 	docker buildx rm multibuild
 
 .build_$(TS_VERSION)_$(PG_VER)_oss: Dockerfile
-	docker build --build-arg PREV_EXTRA="-oss" --build-arg OSS_ONLY=" -DAPACHE_ONLY=1" --build-arg PG_VERSION=$(PG_VER_NUMBER) $(TAG_OSS) .
+	docker build --build-arg OSS_ONLY=" -DAPACHE_ONLY=1" --build-arg PG_VERSION=$(PG_VER_NUMBER) $(TAG_OSS) .
 	touch .build_$(TS_VERSION)_$(PG_VER)_oss
 
 .build_$(TS_VERSION)_$(PG_VER): Dockerfile
