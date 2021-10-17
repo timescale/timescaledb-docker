@@ -10,20 +10,14 @@ FROM golang:${GO_VERSION}-alpine AS tools
 ENV TOOLS_VERSION 0.8.1
 
 RUN apk update && apk add --no-cache git \
-    && mkdir -p ${GOPATH}/src/github.com/timescale/ \
-    && cd ${GOPATH}/src/github.com/timescale/ \
-    && git clone https://github.com/timescale/timescaledb-tune.git \
-    && git clone https://github.com/timescale/timescaledb-parallel-copy.git \
-    # Build timescaledb-tune
-    && cd timescaledb-tune/cmd/timescaledb-tune \
-    && git fetch && git checkout --quiet $(git describe --abbrev=0) \
-    && go get -d -v \
-    && go build -o /go/bin/timescaledb-tune \
-    # Build timescaledb-parallel-copy
-    && cd ${GOPATH}/src/github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy \
-    && git fetch && git checkout --quiet $(git describe --abbrev=0) \
-    && go get -d -v \
-    && go build -o /go/bin/timescaledb-parallel-copy
+    && go get github.com/timescale/timescaledb-tune/cmd/timescaledb-tune \
+    && go get github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy \
+    && go get github.com/timescale/timescaledb-backup/cmd/ts-dump \
+    && go get github.com/timescale/timescaledb-backup/cmd/ts-restore \
+    && go build -o /go/bin/timescaledb-tune -v github.com/timescale/timescaledb-tune/cmd/timescaledb-tune \
+    && go build -o /go/bin/timescaledb-parallel-copy -v github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy \
+    && go build -o /go/bin/ts-dump -v github.com/timescale/timescaledb-backup/cmd/ts-dump \
+    && go build -o /go/bin/ts-restore -v github.com/timescale/timescaledb-backup/cmd/ts-restore
 
 ############################
 # Grab old versions from previous version
