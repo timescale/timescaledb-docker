@@ -30,8 +30,8 @@ if [ -z "${TS_TUNE_MEMORY:-}" ]; then
             TS_TUNE_MEMORY=""
         fi
 
-        FREE_MB=$(free -m | grep 'Mem' | awk '{print $2}')
-        FREE_BYTES=$(( ${FREE_MB} * 1024 * 1024 ))
+        FREE_KB=$(grep MemTotal: /proc/meminfo | awk '{print $2}')
+        FREE_BYTES=$(( ${FREE_KB} * 1024 ))
         if [ ${TS_TUNE_MEMORY} -gt ${FREE_BYTES} ]; then
             # Something weird is going on if the cgroups memory limit exceeds the total available
             # amount of system memory reported by "free", which is the total amount of memory available on the host.
