@@ -60,6 +60,7 @@ RUN set -ex \
                 coreutils \
                 dpkg-dev dpkg \
                 gcc \
+                krb5-dev \
                 libc-dev \
                 make \
                 cmake \
