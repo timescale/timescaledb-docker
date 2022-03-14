@@ -11,7 +11,7 @@ on:
 
 env:
   ORG: timescaledev
-  TS_VERSION: master
+  TS_VERSION: main
   PLATFORM: linux/amd64
 
 jobs:
