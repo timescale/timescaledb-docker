@@ -9,7 +9,7 @@ on:
         required: true
 env:
   ORG: timescale #timescaledev
-  TS_VERSION: ${{ github.event.inputs.version || '2.5.0' }}
+  TS_VERSION: ${{ github.event.inputs.version || '2.7.0' }}
 jobs:
 
   # Build multi-arch TimescaleDB images for both TSL and OSS code.
