@@ -77,3 +77,5 @@ RUN set -ex \
     && apk del .fetch-deps .build-deps \
     && rm -rf /build \
     && sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'timescaledb,\2'/;s/,'/'/" /usr/local/share/postgresql/postgresql.conf.sample
+    
+HEALTCHECK CMD pg_isready -U postgres
