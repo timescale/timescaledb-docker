@@ -4,20 +4,14 @@ ARG TS_VERSION
 ############################
 # Build tools binaries in separate image
 ############################
-ARG GO_VERSION=1.14.0
+ARG GO_VERSION=1.19.1
 FROM golang:${GO_VERSION}-alpine AS tools
 
 ENV TOOLS_VERSION 0.8.1
 
-RUN apk update && apk add --no-cache git \
-    && go get github.com/timescale/timescaledb-tune/cmd/timescaledb-tune \
-    && go get github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy \
-    && go get github.com/timescale/timescaledb-backup/cmd/ts-dump \
-    && go get github.com/timescale/timescaledb-backup/cmd/ts-restore \
-    && go build -o /go/bin/timescaledb-tune -v github.com/timescale/timescaledb-tune/cmd/timescaledb-tune \
-    && go build -o /go/bin/timescaledb-parallel-copy -v github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy \
-    && go build -o /go/bin/ts-dump -v github.com/timescale/timescaledb-backup/cmd/ts-dump \
-    && go build -o /go/bin/ts-restore -v github.com/timescale/timescaledb-backup/cmd/ts-restore
+RUN apk update && apk add --no-cache git gcc \
+    && go install github.com/timescale/timescaledb-tune/cmd/timescaledb-tune@latest \
+    && go install github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy@latest
 
 ############################
 # Grab old versions from previous version
