@@ -9,7 +9,7 @@ FROM golang:${GO_VERSION}-alpine AS tools
 
 ENV TOOLS_VERSION 0.8.1
 
-RUN apk update && apk add --no-cache git gcc \
+RUN apk update && apk add --no-cache git gcc musl-dev \
     && go install github.com/timescale/timescaledb-tune/cmd/timescaledb-tune@latest \
     && go install github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy@latest
 
