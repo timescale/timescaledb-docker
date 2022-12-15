@@ -21,9 +21,12 @@ ARG PREV_IMAGE
 FROM ${PREV_IMAGE} AS oldversions
 # Remove update files, mock files, and all but the last 5 .so/.sql files
 RUN rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql \
-    && if [ -f $(pg_config --pkglibdir)/timescaledb-tsl-1*.so ]; then rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-tsl-1*.so | head -n -5); fi \
-    && if [ -f $(pg_config --pkglibdir)/timescaledb-1*.so ]; then rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-*.so | head -n -5); fi \
-    && if [ -f $(pg_config --sharedir)/extension/timescaledb--1*.sql ]; then rm -f $(ls -1 $(pg_config --sharedir)/extension/timescaledb--1*.sql | head -n -5); fi
+    && if [ -f $(pg_config --pkglibdir)/timescaledb-tsl-1*.so ]; then rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-tsl-1*.so); fi \
+    && if [ -f $(pg_config --pkglibdir)/timescaledb-1*.so ]; then rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-1*.so); fi \
+    && if [ -f $(pg_config --sharedir)/extension/timescaledb--1*.sql ]; then rm -f $(ls -1 $(pg_config --sharedir)/extension/timescaledb--1*.sql); fi
+    && if [ -f $(pg_config --pkglibdir)/timescaledb-tsl-2*.so ]; then rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-tsl-2*.so | head -n -5); fi \
+    && if [ -f $(pg_config --pkglibdir)/timescaledb-2*.so ]; then rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-2*.so | head -n -5); fi \
+    && if [ -f $(pg_config --sharedir)/extension/timescaledb--2*.sql ]; then rm -f $(ls -1 $(pg_config --sharedir)/extension/timescaledb--2*.sql | head -n -5); fi
 
 ############################
 # Now build image and copy in tools
