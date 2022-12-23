@@ -33,7 +33,7 @@ jobs:
         pg: [14]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Docker Buildx
       id: buildx

@@ -2,7 +2,7 @@ name: Add bugs to bugs project
 
 on:
   issues:
-    types: [ opened, labeled ]
+    types: [ opened ]
 
 jobs:
   add-to-project:
