@@ -41,6 +41,7 @@ COPY --from=oldversions /usr/local/share/postgresql/extension/timescaledb--*.sql
 
 ARG TS_VERSION
 RUN set -ex \
+    && apk add libssl1.1 \
     && apk add --no-cache --virtual .fetch-deps \
                 ca-certificates \
                 git \
