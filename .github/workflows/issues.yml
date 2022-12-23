@@ -13,4 +13,3 @@ jobs:
         with:
           project-url: https://github.com/orgs/timescale/projects/55
           github-token: ${{ secrets.ORG_AUTOMATION_TOKEN }}
-          labeled: bug
