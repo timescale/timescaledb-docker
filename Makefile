@@ -54,7 +54,7 @@ default: image
 	touch .build_$(TS_VERSION)_$(PG_VER)_oss
 
 .build_$(TS_VERSION)_$(PG_VER): Dockerfile
-	docker build --build-arg PG_VERSION=$(PG_VER_NUMBER) $(TAG) .
+	docker build --build-arg PG_VERSION=$(PG_VER_NUMBER) --build-arg TS_VERSION=$(TS_VERSION) --build-arg PREV_IMAGE=$(PREV_IMAGE) $(TAG) .
 	touch .build_$(TS_VERSION)_$(PG_VER)
 
 image: .build_$(TS_VERSION)_$(PG_VER)

@@ -38,6 +38,7 @@ fi
 
 echo "timescaledb.telemetry_level=${TS_TELEMETRY}" >> ${POSTGRESQL_CONF_DIR}/postgresql.conf
 
+export PGPASSWORD="$POSTGRESQL_PASSWORD"
 
 # create extension timescaledb in initial databases
 psql -U "${POSTGRES_USER}" postgres -f ${create_sql}
