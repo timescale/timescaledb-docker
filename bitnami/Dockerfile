@@ -19,12 +19,20 @@ RUN apk update && apk add --no-cache git gcc \
 ARG PG_VERSION
 ARG PREV_IMAGE
 FROM ${PREV_IMAGE} AS oldversions
-# Remove update files, mock files, and all but the last 5 .so/.sql files
+# Remove update files, mock files, and all but the last 5 .so/.sql files.
+# There are three types of SQL files, initialization, upgrade, and downgrade,
+# which we have to count separately, but it's hard to match with globs, and
+# there are also many upgrade/downgrade files per version, so just keep more of
+# them.
 USER 0
-RUN rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql \
-    && if [ -f $(pg_config --pkglibdir)/timescaledb-tsl-1*.so ]; then rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-tsl-1*.so | head -n -5); fi \
-    && if [ -f $(pg_config --pkglibdir)/timescaledb-1*.so ]; then rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-*.so | head -n -5); fi \
-    && if [ -f $(pg_config --sharedir)/extension/timescaledb--1*.sql ]; then rm -f $(ls -1 $(pg_config --sharedir)/extension/timescaledb--1*.sql | head -n -5); fi
+RUN set +o pipefail \
+    && rm -vf $(pg_config --sharedir)/extension/timescaledb*mock*.sql \
+    && rm -vf $(ls -1tr $(pg_config --pkglibdir)/timescaledb-tsl-*.so | head -n -5) \
+    && rm -vf $(ls -1tr $(pg_config --pkglibdir)/timescaledb-[0-9]*.so | head -n -5) \
+    && rm -vf $(ls -1tr $(pg_config --sharedir)/extension/timescaledb--*.sql | head -n -20) \
+    && { ls $(pg_config --sharedir)/extension/timescaledb--*.sql \
+      ; ls $(pg_config --pkglibdir)/timescaledb-*.so \
+      ; : ; }
 
 ############################
 # Now build image and copy in tools
@@ -39,6 +47,7 @@ COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
 COPY --from=oldversions /opt/bitnami/postgresql/lib/timescaledb-*.so /opt/bitnami/postgresql/lib/
 COPY --from=oldversions /opt/bitnami/postgresql/share/extension/timescaledb--*.sql /opt/bitnami/postgresql/share/extension/
+COPY bitnami/timescaledb-bitnami-entrypoint.sh /opt/bitnami/scripts/postgresql/
 
 USER 0
 ARG TS_VERSION
@@ -79,10 +88,13 @@ RUN set -ex \
             cmake \
     && apt-get clean -y \
     && rm -rf \
-      "${HOME}/.cache" \
+        /build \
+        "${HOME}/.cache" \
         /var/lib/apt/lists/* \
         /tmp/*               \
         /var/tmp/*
-RUN sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'timescaledb,\2'/;s/,'/'/" /opt/bitnami/postgresql/share/postgresql.conf.sample /opt/bitnami/postgresql/conf/postgresql.conf
 
 USER 1001
+
+ENTRYPOINT [ "/opt/bitnami/scripts/postgresql/timescaledb-bitnami-entrypoint.sh" ]
+CMD [ "/opt/bitnami/scripts/postgresql/run.sh" ]
