@@ -10,5 +10,6 @@ else
 fi
 export POSTGRESQL_SHARED_PRELOAD_LIBRARIES
 
-# Fall through to the original entrypoint.
-/opt/bitnami/scripts/postgresql/entrypoint.sh "$@"
+# Fall through to the original entrypoint. Note that we use exec here because
+# this wrapper script shouldn't change PID 1 of the container.
+exec /opt/bitnami/scripts/postgresql/entrypoint.sh "$@"
