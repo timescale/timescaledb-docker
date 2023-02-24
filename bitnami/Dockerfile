@@ -25,6 +25,15 @@ FROM ${PREV_IMAGE} AS oldversions
 # there are also many upgrade/downgrade files per version, so just keep more of
 # them.
 USER 0
+
+# Docker COPY needs at least one file to copy. If no source is specified, the
+# command fails. Create two '.emptyfile' files here to prevent the
+# 'COPY --from=oldversions' command below from failing. The files are removed
+# after the copy operation is performed.
+#
+# When the first image for a PG version is created, PREV_IMAGE is set to the
+# bitnami upstream image. Therefore, no TimescaleDB files exist and the
+# copy commands would fail.
 RUN set +o pipefail \
     && rm -vf $(pg_config --sharedir)/extension/timescaledb*mock*.sql \
     && rm -vf $(ls -1tr $(pg_config --pkglibdir)/timescaledb-tsl-*.so | head -n -5) \
@@ -32,7 +41,9 @@ RUN set +o pipefail \
     && rm -vf $(ls -1tr $(pg_config --sharedir)/extension/timescaledb--*.sql | head -n -20) \
     && { ls $(pg_config --sharedir)/extension/timescaledb--*.sql \
       ; ls $(pg_config --pkglibdir)/timescaledb-*.so \
-      ; : ; }
+      ; : ; } \
+    && touch $(pg_config --sharedir)/extension/.emptyfile \
+    && touch $(pg_config --pkglibdir)/.emptyfile
 
 ############################
 # Now build image and copy in tools
@@ -45,13 +56,15 @@ LABEL maintainer="Timescale https://www.timescale.com"
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
-COPY --from=oldversions /opt/bitnami/postgresql/lib/timescaledb-*.so /opt/bitnami/postgresql/lib/
-COPY --from=oldversions /opt/bitnami/postgresql/share/extension/timescaledb--*.sql /opt/bitnami/postgresql/share/extension/
+COPY --from=oldversions /opt/bitnami/postgresql/lib/.emptyfile /opt/bitnami/postgresql/lib/timescaledb-*.so /opt/bitnami/postgresql/lib/
+COPY --from=oldversions /opt/bitnami/postgresql/share/extension/.emptyfile /opt/bitnami/postgresql/share/extension/timescaledb--*.sql /opt/bitnami/postgresql/share/extension/
 COPY bitnami/timescaledb-bitnami-entrypoint.sh /opt/bitnami/scripts/postgresql/
 
 USER 0
 ARG TS_VERSION
 RUN set -ex \
+    && rm -v /opt/bitnami/postgresql/lib/.emptyfile \
+    && rm -v /opt/bitnami/postgresql/share/extension/.emptyfile \
     && mkdir -p /var/lib/apt/lists/partial \
     && apt-get update \
     && apt-get -y install \
