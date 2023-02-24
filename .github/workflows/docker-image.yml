@@ -16,7 +16,7 @@ on:
         default: false
 env:
   ORG: timescale #timescaledev
-  TS_VERSION: ${{ github.event.inputs.version || '2.9.0' }}
+  TS_VERSION: ${{ github.event.inputs.version || '2.10.0' }}
 jobs:
 
   # Build multi-arch TimescaleDB images for both TSL and OSS code.
@@ -66,7 +66,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [12, 13, 14]
+        pg: [12, 13, 14, 15]
 
     steps:
       - uses: actions/checkout@v3
