@@ -82,5 +82,6 @@ RUN set -ex \
     \
     && if [ "${OSS_ONLY}" != "" ]; then rm -f $(pg_config --pkglibdir)/timescaledb-tsl-*.so; fi \
     && apk del .fetch-deps .build-deps \
+    && apk add --no-cache openssl1.1-compat \
     && rm -rf /build \
     && sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'timescaledb,\2'/;s/,'/'/" /usr/local/share/postgresql/postgresql.conf.sample
