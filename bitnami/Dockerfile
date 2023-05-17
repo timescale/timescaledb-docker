@@ -1,3 +1,4 @@
+ARG PG_BASE_IMAGE
 ARG PG_VERSION
 ARG PREV_IMAGE
 ARG TS_VERSION
@@ -48,8 +49,10 @@ RUN set +o pipefail \
 ############################
 # Now build image and copy in tools
 ############################
+ARG PG_BASE_IMAGE
 ARG PG_VERSION
-FROM bitnami/postgresql:${PG_VERSION}
+FROM bitnami/${PG_BASE_IMAGE}:${PG_VERSION} AS timescale
+ARG PG_BASE_IMAGE
 ARG PG_VERSION
 
 LABEL maintainer="Timescale https://www.timescale.com"
@@ -58,7 +61,7 @@ COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
 COPY --from=oldversions /opt/bitnami/postgresql/lib/.emptyfile /opt/bitnami/postgresql/lib/timescaledb-*.so /opt/bitnami/postgresql/lib/
 COPY --from=oldversions /opt/bitnami/postgresql/share/extension/.emptyfile /opt/bitnami/postgresql/share/extension/timescaledb--*.sql /opt/bitnami/postgresql/share/extension/
-COPY bitnami/timescaledb-bitnami-entrypoint.sh /opt/bitnami/scripts/postgresql/
+COPY bitnami/timescaledb-bitnami-entrypoint.sh /opt/bitnami/scripts/timescale/
 
 USER 0
 ARG TS_VERSION
@@ -109,5 +112,15 @@ RUN set -ex \
 
 USER 1001
 
-ENTRYPOINT [ "/opt/bitnami/scripts/postgresql/timescaledb-bitnami-entrypoint.sh" ]
+FROM timescale AS timescale-postgresql
+ENTRYPOINT [ "/opt/bitnami/scripts/timescale/timescaledb-bitnami-entrypoint.sh" ]
 CMD [ "/opt/bitnami/scripts/postgresql/run.sh" ]
+
+FROM timescale AS timescale-postgresql-repmgr
+ENTRYPOINT [ "/opt/bitnami/scripts/timescale/timescaledb-bitnami-entrypoint.sh" ]
+CMD [ "/opt/bitnami/scripts/postgresql-repmgr/run.sh" ]
+
+FROM timescale-${PG_BASE_IMAGE}
+ARG PG_BASE_IMAGE
+ENV PG_BASE_IMAGE=${PG_BASE_IMAGE}
+ENV PG_ORIGINAL_ENTRYPOINT_PATH="/opt/bitnami/scripts/${PG_BASE_IMAGE}"

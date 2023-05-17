@@ -61,12 +61,13 @@ jobs:
   # The images are only built for TSL code.
   timescaledb-bitnami:
 
-    name: PG${{ matrix.pg }}-bitnami
+    name: PG${{ matrix.pg }}-${{ matrix.base-image }}-bitnami
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         pg: [13, 14, 15, 16]
+        base-image: [postgresql, postgresql-repmgr]
 
     steps:
       - uses: actions/checkout@v3
@@ -80,5 +81,5 @@ jobs:
           then
               export BETA=1
           fi
-          make push ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION BETA=$BETA
+          make push ORG=$ORG PG_BASE_IMAGE=${{ matrix.base-image }} PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION BETA=$BETA
         working-directory: bitnami
