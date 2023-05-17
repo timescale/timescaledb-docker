@@ -5,7 +5,11 @@ create_sql=`mktemp`
 # Checks to support bitnami image with same scripts so they stay in sync
 if [ ! -z "${BITNAMI_APP_NAME:-}" ]; then
 	if [ -z "${POSTGRES_USER:-}" ]; then
-		POSTGRES_USER=${POSTGRESQL_USERNAME}
+		POSTGRES_USER=postgres
+	fi
+
+	if [ -z "${POSTGRESQL_PASSWORD:-}" ]; then
+		POSTGRESQL_PASSWORD=${POSTGRESQL_POSTGRES_PASSWORD}
 	fi
 
 	if [ -z "${POSTGRES_DB:-}" ]; then
