@@ -5,6 +5,8 @@ on:
     branches:
       - cron_build
 
+  workflow_dispatch:
+
   schedule:
     # run daily 0:00
     - cron: '0 0 * * *'
