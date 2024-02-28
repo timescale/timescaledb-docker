@@ -19,11 +19,9 @@ RUN apk update && apk add --no-cache git gcc musl-dev \
 ARG PG_VERSION
 ARG PREV_IMAGE
 FROM ${PREV_IMAGE} AS oldversions
-# Remove update files, mock files, and all but the last 5 .so/.sql files
-RUN rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql \
-    && if [ -f $(pg_config --pkglibdir)/timescaledb-tsl-1*.so ]; then rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-tsl-1*.so | head -n -5); fi \
-    && if [ -f $(pg_config --pkglibdir)/timescaledb-1*.so ]; then rm -f $(ls -1 $(pg_config --pkglibdir)/timescaledb-*.so | head -n -5); fi \
-    && if [ -f $(pg_config --sharedir)/extension/timescaledb--1*.sql ]; then rm -f $(ls -1 $(pg_config --sharedir)/extension/timescaledb--1*.sql | head -n -5); fi
+
+# Remove mock files
+RUN rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql
 
 ############################
 # Now build image and copy in tools
