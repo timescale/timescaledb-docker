@@ -20,13 +20,10 @@ RUN apk update && apk add --no-cache git gcc \
 ARG PG_VERSION
 ARG PREV_IMAGE
 FROM ${PREV_IMAGE} AS oldversions
-# Remove update files, mock files, and all but the last 5 .so/.sql files.
-# There are three types of SQL files, initialization, upgrade, and downgrade,
-# which we have to count separately, but it's hard to match with globs, and
-# there are also many upgrade/downgrade files per version, so just keep more of
-# them.
 USER 0
 
+# Remove mock files
+#
 # Docker COPY needs at least one file to copy. If no source is specified, the
 # command fails. Create two '.emptyfile' files here to prevent the
 # 'COPY --from=oldversions' command below from failing. The files are removed
@@ -37,12 +34,6 @@ USER 0
 # copy commands would fail.
 RUN set +o pipefail \
     && rm -vf $(pg_config --sharedir)/extension/timescaledb*mock*.sql \
-    && rm -vf $(ls -1tr $(pg_config --pkglibdir)/timescaledb-tsl-*.so | head -n -5) \
-    && rm -vf $(ls -1tr $(pg_config --pkglibdir)/timescaledb-[0-9]*.so | head -n -5) \
-    && rm -vf $(ls -1tr $(pg_config --sharedir)/extension/timescaledb--*.sql | head -n -20) \
-    && { ls $(pg_config --sharedir)/extension/timescaledb--*.sql \
-      ; ls $(pg_config --pkglibdir)/timescaledb-*.so \
-      ; : ; } \
     && touch $(pg_config --sharedir)/extension/.emptyfile \
     && touch $(pg_config --pkglibdir)/.emptyfile
 
