@@ -112,6 +112,3 @@ ENTRYPOINT [ "/opt/bitnami/scripts/timescale/timescaledb-bitnami-entrypoint.sh" 
 CMD [ "/opt/bitnami/scripts/postgresql-repmgr/run.sh" ]
 
 FROM timescale-${PG_BASE_IMAGE}
-ARG PG_BASE_IMAGE
-ENV PG_BASE_IMAGE=${PG_BASE_IMAGE}
-ENV PG_ORIGINAL_ENTRYPOINT_PATH="/opt/bitnami/scripts/${PG_BASE_IMAGE}"
