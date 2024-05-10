@@ -1,4 +1,4 @@
-name: Release Docker Image
+name: Release Bitnami Image
 on:
   push:
     branches: [ release_docker, dev-build ]
@@ -19,40 +19,30 @@ env:
   TS_VERSION: ${{ github.event.inputs.version || '2.15.0' }}
 jobs:
 
-  # Build multi-arch TimescaleDB images for both TSL and OSS code.
-  timescaledb:
+  # Build bitnami images of TimscaleDB.
+  # The images are built only for amd64, since it is the only supported architecture in the base image bitname/postgresql.
+  # The images are only built for TSL code.
+  timescaledb-bitnami:
 
-    name: PG${{ matrix.pg }}${{ matrix.oss }}
+    name: PG${{ matrix.pg }}-${{ matrix.base-image }}-bitnami
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         pg: [13, 14, 15, 16]
-        oss: [ "", "-oss" ]
+        base-image: [postgresql, postgresql-repmgr]
+
     steps:
       - uses: actions/checkout@v3
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-        with:
-          platforms: all
-
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Available platforms
-        run: echo ${{ steps.buildx.outputs.platforms }}
 
       - name: Login to DockerHub Registry
         run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
 
-      - name: Build and push multi-platform Docker image for TimescaleDB
+      - name: Build and push amd64 Docker image for TimescaleDB bitnami
         run: |
           if [ "${{ github.event.inputs.no_tag_latest }}" == "true" ]
           then
               export BETA=1
           fi
-          make multi${{ matrix.oss }} ORG=$ORG PG_VER=pg${{ matrix.pg }} \
-              TS_VERSION=$TS_VERSION PREV_EXTRA="${{ matrix.oss }}" BETA=$BETA
-
+          make push ORG=$ORG PG_BASE_IMAGE=${{ matrix.base-image }} PG_VER=pg${{ matrix.pg }} TS_VERSION=$TS_VERSION BETA=$BETA
+        working-directory: bitnami
