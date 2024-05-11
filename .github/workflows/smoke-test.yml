@@ -21,7 +21,7 @@ jobs:
         type: ['normal', 'repmgr-bitnami', 'bitnami']
     steps:
       - name: Check out the source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build Docker Image for TimescaleDB
         run: |
