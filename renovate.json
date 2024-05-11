@@ -5,7 +5,7 @@
   ],
   "packageRules": [
     {
-      "matchUpdateTypes": ["patch", "minor", "digest"],
+      "matchUpdateTypes": ["patch", "minor", "major", "digest"],
       "groupName": "maintenance",
       "schedule": ["every month"]
     }
