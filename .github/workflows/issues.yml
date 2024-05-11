@@ -11,7 +11,7 @@ jobs:
     name: Add issue to project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@v0.4.0
+      - uses: actions/add-to-project@v0.6.1
         with:
           project-url: https://github.com/orgs/timescale/projects/55
           github-token: ${{ secrets.ORG_AUTOMATION_TOKEN }}
@@ -23,7 +23,7 @@ jobs:
     if: github.event_name == 'issues' && github.event.action == 'labeled'
       && github.event.label.name == 'waiting-for-author'
     steps:
-      - uses: leonsteinhaeuser/project-beta-automations@v2.0.0
+      - uses: leonsteinhaeuser/project-beta-automations@v2.2.1
         with:
           gh_token: ${{ secrets.ORG_AUTOMATION_TOKEN }}
           organization: timescale
@@ -53,7 +53,7 @@ jobs:
           repo-token: ${{ secrets.ORG_AUTOMATION_TOKEN }}
       - name: Move to waiting for engineering column
         if: ${{ steps.checkUserMember.outputs.isTeamMember == 'false' }}
-        uses: leonsteinhaeuser/project-beta-automations@v2.0.0
+        uses: leonsteinhaeuser/project-beta-automations@v2.2.1
         with:
           gh_token: ${{ secrets.ORG_AUTOMATION_TOKEN }}
           organization: timescale
