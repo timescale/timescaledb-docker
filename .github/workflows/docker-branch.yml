@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [14]
+        pg: [16]
 
     steps:
     - uses: actions/checkout@v3
