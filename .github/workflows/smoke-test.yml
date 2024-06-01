@@ -17,20 +17,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [13, 14, 15, 16]
+        pg: [14, 15, 16]
         type: ['normal', 'repmgr-bitnami', 'bitnami']
     steps:
       - name: Check out the source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build Docker Image for TimescaleDB
         run: |
-          
+
           if [ ${{ matrix.type }} == bitnami ]
           then
             cd bitnami
             make image PG_BASE_IMAGE=postgresql PG_VER=pg${{ matrix.pg }} TAG_VERSION=smoketest-image BETA=1
-          elif [ ${{ matrix.type }} == repmgr-bitnami ] 
+          elif [ ${{ matrix.type }} == repmgr-bitnami ]
           then
             cd bitnami
             make image PG_BASE_IMAGE=postgresql-repmgr PG_VER=pg${{ matrix.pg }} TAG_VERSION=smoketest-image BETA=1
