@@ -1,2 +1,4 @@
 *~
 .build_*
+.github
+.idea

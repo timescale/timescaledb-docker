@@ -2,7 +2,7 @@ NAME=timescaledb
 # Default is to timescaledev to avoid unexpected push to the main repo
 # Set ORG to timescale in the caller
 ORG=timescaledev
-PG_VER=pg12
+PG_VER=pg16
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 TS_VERSION=main
 PREV_TS_VERSION=$(shell wget --quiet -O - https://raw.githubusercontent.com/timescale/timescaledb/${TS_VERSION}/version.config | grep update_from_version | sed -e 's!update_from_version = !!')
@@ -19,6 +19,9 @@ TAG_LATEST=$(ORG)/$(NAME):latest-$(PG_VER)
 TAG=-t $(TAG_VERSION) $(if $(BETA),,-t $(TAG_LATEST))
 TAG_OSS=-t $(TAG_VERSION)-oss $(if $(BETA),,-t $(TAG_LATEST)-oss)
 
+PGVECTOR_VERSION=v0.7.1
+PGAI_VERSION=v0.1.0
+
 default: image
 
 .multi_$(TS_VERSION)_$(PG_VER)_oss: Dockerfile
@@ -31,6 +34,8 @@ default: image
 		--build-arg PG_VERSION=$(PG_VER_NUMBER) \
 		--build-arg PREV_IMAGE=$(PREV_IMAGE) \
 		--build-arg OSS_ONLY=" -DAPACHE_ONLY=1" \
+		--build-arg PGVECTOR_VERSION=$(PGVECTOR_VERSION) \
+		--build-arg PGAI_VERSION=$(PGAI_VERSION) \
 		$(TAG_OSS) $(PUSH_MULTI) .
 	touch .multi_$(TS_VERSION)_$(PG_VER)_oss
 	docker buildx rm multibuild
@@ -45,16 +50,18 @@ default: image
 		--build-arg TS_VERSION=$(TS_VERSION) \
 		--build-arg PREV_IMAGE=$(PREV_IMAGE) \
 		--build-arg PG_VERSION=$(PG_VER_NUMBER) \
+		--build-arg PGVECTOR_VERSION=$(PGVECTOR_VERSION) \
+		--build-arg PGAI_VERSION=$(PGAI_VERSION) \
 		$(TAG) $(PUSH_MULTI) .
 	touch .multi_$(TS_VERSION)_$(PG_VER)
 	docker buildx rm multibuild
 
 .build_$(TS_VERSION)_$(PG_VER)_oss: Dockerfile
-	docker build --build-arg OSS_ONLY=" -DAPACHE_ONLY=1" --build-arg PG_VERSION=$(PG_VER_NUMBER) $(TAG_OSS) .
+	docker build --build-arg OSS_ONLY=" -DAPACHE_ONLY=1" --build-arg PG_VERSION=$(PG_VER_NUMBER) --build-arg PGVECTOR_VERSION=$(PGVECTOR_VERSION) --build-arg PGAI_VERSION=$(PGAI_VERSION) $(TAG_OSS) .
 	touch .build_$(TS_VERSION)_$(PG_VER)_oss
 
 .build_$(TS_VERSION)_$(PG_VER): Dockerfile
-	docker build --build-arg PG_VERSION=$(PG_VER_NUMBER) --build-arg TS_VERSION=$(TS_VERSION) --build-arg PREV_IMAGE=$(PREV_IMAGE) $(TAG) .
+	docker build --build-arg PG_VERSION=$(PG_VER_NUMBER) --build-arg TS_VERSION=$(TS_VERSION) --build-arg PREV_IMAGE=$(PREV_IMAGE) --build-arg PGVECTOR_VERSION=$(PGVECTOR_VERSION) --build-arg PGAI_VERSION=$(PGAI_VERSION) $(TAG) .
 	touch .build_$(TS_VERSION)_$(PG_VER)
 
 image: .build_$(TS_VERSION)_$(PG_VER)
