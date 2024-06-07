@@ -27,10 +27,47 @@ RUN rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql
 # Now build image and copy in tools
 ############################
 ARG PG_VERSION
-FROM postgres:${PG_VERSION}-alpine3.18
+FROM postgres:${PG_VERSION}-alpine3.20
 ARG OSS_ONLY
 
 LABEL maintainer="Timescale https://www.timescale.com"
+
+ARG PG_VERSION
+RUN set -ex; \
+    apk update; \
+    apk add --no-cache \
+        postgresql${PG_VERSION}-plpython3
+
+ARG PGVECTOR_VERSION
+RUN set -ex; \
+    apk update; \
+    apk add --no-cache --virtual .vector-deps \
+        postgresql${PG_VERSION}-dev \
+        git \
+        build-base \
+        clang15 \
+        llvm15-dev \
+        llvm15; \
+    git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
+    cd /build/pgvector; \
+    make; \
+    make install; \
+    apk del .vector-deps
+
+# install pgai only on pg16+
+ARG PGAI_VERSION
+RUN set -ex; \
+    if [ "$PG_VERSION" -gt 15 ]; then \
+        apk add --no-cache --virtual .pgai-deps \
+            git \
+            py3-pip; \
+        git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
+        cd /build/pgai; \
+        cp /build/pgai/ai--*.sql /usr/local/share/postgresql/extension/; \
+        cp /build/pgai/ai.control /usr/local/share/postgresql/extension/; \
+        pip install --break-system-packages -r /build/pgai/requirements.txt; \
+        apk del .pgai-deps; \
+    fi
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
@@ -39,7 +76,6 @@ COPY --from=oldversions /usr/local/share/postgresql/extension/timescaledb--*.sql
 
 ARG TS_VERSION
 RUN set -ex \
-    && apk add libssl1.1 \
     && apk add --no-cache --virtual .fetch-deps \
                 ca-certificates \
                 git \
