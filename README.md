@@ -31,7 +31,7 @@ You can also connect your app via port `5432` on the host machine.
 If you are running your docker image for the first time, you can also set an environmental variable, `TIMESCALEDB_TELEMETRY`, to set the level of [telemetry](https://docs.timescale.com/using-timescaledb/telemetry) in the Timescale docker instance. For example, to turn off telemetry, run:
 
 ```
-docker run -d --name some-timescaledb -p 5432:5432 --env TIMESCALEDB_TELEMETRY=off -e POSTGRES_PASSWORD=password timescale/timescaledb:latest-pg16
+docker run -d --name some-timescaledb -p 5432:5432 -e TIMESCALEDB_TELEMETRY=off -e POSTGRES_PASSWORD=password timescale/timescaledb:latest-pg16
 ```
 
 Note that if the cluster has previously been initialized, you should not use this environment variable to set the level of telemetry. Instead, follow the [instructions](https://docs.timescale.com/using-timescaledb/telemetry) in our docs to disable telemetry once a cluster is running.
