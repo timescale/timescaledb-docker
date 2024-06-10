@@ -17,13 +17,13 @@ environment variables one can set, extensibility, etc.
 ### Starting a TimescaleDB instance
 
 ```
-docker run -d --name some-timescaledb -p 5432:5432 timescale/timescaledb:latest-pg16
+docker run -d --name some-timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password timescale/timescaledb:latest-pg16
 ```
 
 Then connect with an app or the `psql` client:
 
 ```
-docker run -it --net=host --rm timescale/timescaledb:latest-pg16 psql -h localhost -U postgres
+docker run -it --net=host -e PGPASSWORD=password --rm timescale/timescaledb:latest-pg16 psql -h localhost -U postgres
 ```
 
 You can also connect your app via port `5432` on the host machine.
@@ -31,7 +31,7 @@ You can also connect your app via port `5432` on the host machine.
 If you are running your docker image for the first time, you can also set an environmental variable, `TIMESCALEDB_TELEMETRY`, to set the level of [telemetry](https://docs.timescale.com/using-timescaledb/telemetry) in the Timescale docker instance. For example, to turn off telemetry, run:
 
 ```
-docker run -d --name some-timescaledb -p 5432:5432 --env TIMESCALEDB_TELEMETRY=off timescale/timescaledb:latest-pg16
+docker run -d --name some-timescaledb -p 5432:5432 --env TIMESCALEDB_TELEMETRY=off -e POSTGRES_PASSWORD=password timescale/timescaledb:latest-pg16
 ```
 
 Note that if the cluster has previously been initialized, you should not use this environment variable to set the level of telemetry. Instead, follow the [instructions](https://docs.timescale.com/using-timescaledb/telemetry) in our docs to disable telemetry once a cluster is running.
