@@ -61,6 +61,7 @@ RUN set -ex; \
         apk update; \
         apk add --no-cache --virtual .pgai-deps \
             git \
+            cargo \
             py3-pip; \
         git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
         cp /build/pgai/ai--*.sql /usr/local/share/postgresql/extension/; \
