@@ -58,14 +58,14 @@ RUN set -ex; \
 ARG PGAI_VERSION
 RUN set -ex; \
     if [ "$PG_VERSION" -gt 15 ]; then \
+        apk update; \
         apk add --no-cache --virtual .pgai-deps \
             git \
             py3-pip; \
         git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
-        cd /build/pgai; \
         cp /build/pgai/ai--*.sql /usr/local/share/postgresql/extension/; \
         cp /build/pgai/ai.control /usr/local/share/postgresql/extension/; \
-        pip install --break-system-packages -r /build/pgai/requirements.txt; \
+        pip install --verbose --no-cache-dir --break-system-packages -r /build/pgai/requirements.txt; \
         apk del .pgai-deps; \
     fi
 
