@@ -71,6 +71,7 @@ RUN set -ex; \
     make install; \
     apk del .vector-deps
 
+
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
 COPY --from=oldversions /usr/local/lib/postgresql/timescaledb-*.so /usr/local/lib/postgresql/
