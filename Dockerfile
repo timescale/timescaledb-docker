@@ -32,6 +32,23 @@ ARG OSS_ONLY
 
 LABEL maintainer="Timescale https://www.timescale.com"
 
+# install pgai only on pg16+
+ARG PGAI_VERSION
+RUN set -ex; \
+    if [ "$PG_VERSION" -gt 15 ]; then \
+        apk update; \
+        apk add --no-cache --virtual .pgai-deps \
+            git \
+            cargo \
+            python3-dev \
+            py3-pip; \
+        git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
+        cp /build/pgai/ai--*.sql /usr/local/share/postgresql/extension/; \
+        cp /build/pgai/ai.control /usr/local/share/postgresql/extension/; \
+        pip install --verbose --break-system-packages -r /build/pgai/requirements.txt; \
+        apk del .pgai-deps; \
+    fi
+
 ARG PG_VERSION
 RUN set -ex; \
     apk update; \
@@ -54,23 +71,6 @@ RUN set -ex; \
     make install; \
     apk del .vector-deps
 
-# install pgai only on pg16+
-ARG PGAI_VERSION
-RUN set -ex; \
-    if [ "$PG_VERSION" -gt 15 ]; then \
-        apk update; \
-        apk add --no-cache --virtual .pgai-deps \
-            git \
-            build-base \
-            cargo \
-            python3-dev \
-            py3-pip; \
-        git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
-        cp /build/pgai/ai--*.sql /usr/local/share/postgresql/extension/; \
-        cp /build/pgai/ai.control /usr/local/share/postgresql/extension/; \
-        pip install --verbose --no-cache-dir --break-system-packages -r /build/pgai/requirements.txt; \
-        apk del .pgai-deps; \
-    fi
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
