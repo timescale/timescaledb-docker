@@ -34,8 +34,9 @@ LABEL maintainer="Timescale https://www.timescale.com"
 
 # install pgai only on pg16+
 ARG PGAI_VERSION
+ARG PG_MAJOR_VERSION
 RUN set -ex; \
-    if [ "$PG_VERSION" -gt 15 ]; then \
+    if [ "$PG_MAJOR_VERSION" -gt 15 ]; then \
         apk update; \
         apk add --no-cache --virtual .pgai-deps \
             git \
