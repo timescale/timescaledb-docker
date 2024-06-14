@@ -32,6 +32,7 @@ ARG OSS_ONLY
 
 LABEL maintainer="Timescale https://www.timescale.com"
 
+
 ARG PG_VERSION
 RUN set -ex; \
     apk update; \
