@@ -55,17 +55,15 @@ RUN set -ex; \
     make install; \
     apk del .vector-deps
 
-# install pgai only on pg16+ and not on arm
+# install pgai only on pg16+ and not on 32 bit arm
 ARG PGAI_VERSION
 ARG PG_MAJOR_VERSION
 ARG TARGETARCH
 RUN set -ex; \
-    if [ "$PG_MAJOR_VERSION" -gt 15 && "$TARGETARCH" != "arm" ]; then \
+    if [ "$PG_MAJOR_VERSION" -gt 15 ] && [ "$TARGETARCH" != "arm" ]; then \
         apk update; \
         apk add --no-cache --virtual .pgai-deps \
             git \
-            build-base \
-            cargo \
             python3-dev \
             py3-pip; \
         git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
