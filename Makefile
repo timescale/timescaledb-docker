@@ -20,7 +20,7 @@ TAG_LATEST=$(ORG)/$(NAME):latest-$(PG_VER)
 TAG=-t $(TAG_VERSION) $(if $(BETA),,-t $(TAG_LATEST))
 TAG_OSS=-t $(TAG_VERSION)-oss $(if $(BETA),,-t $(TAG_LATEST)-oss)
 
-PGVECTOR_VERSION=v0.7.1
+PGVECTOR_VERSION=v0.7.2
 PGAI_VERSION=v0.2.0
 
 default: image
