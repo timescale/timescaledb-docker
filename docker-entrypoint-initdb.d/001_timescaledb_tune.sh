@@ -18,9 +18,16 @@ fi
 
 if [ -z "${TS_TUNE_MEMORY:-}" ]; then
     # See if we can get the container's total allocated memory from the cgroups metadata
-    if [ -f /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
+    # Try with cgroups v2 first.
+    if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
+        TS_TUNE_MEMORY=$(cat /sys/fs/cgroup/memory.max)
+        TS_CGROUPS_MAX_MEM=true
+    # cgroups v2 is not available, try with cgroups v1
+    elif [ -f /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
         TS_TUNE_MEMORY=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes)
-
+        TS_CGROUPS_MAX_MEM=true
+    fi
+    if [ "${TS_CGROUPS_MAX_MEM:-false}" != "false" ]; then
         if [ "${TS_TUNE_MEMORY}" = "18446744073709551615" ]; then
             # Bash seems to error out for numbers greater than signed 64-bit,
             # so if the value of limit_in_bytes is the 64-bit UNSIGNED max value
