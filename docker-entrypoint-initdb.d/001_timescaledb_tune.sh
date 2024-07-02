@@ -34,28 +34,32 @@ if [ -z "${TS_TUNE_MEMORY:-}" ]; then
         TS_TUNE_MEMORY=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes)
         TS_CGROUPS_MAX_MEM=true
     fi
-    if [ "${TS_CGROUPS_MAX_MEM:-false}" != "false" ]; then
-        if [ "${TS_TUNE_MEMORY}" = "18446744073709551615" ]; then
-            # Bash seems to error out for numbers greater than signed 64-bit,
-            # so if the value of limit_in_bytes is the 64-bit UNSIGNED max value
-            # we should just bail out and hope timescaledb-tune can figure this
-            # out. If we don't, the next comparison is likely going to fail
-            # or it might store a negative value which will crash later.
-            TS_TUNE_MEMORY=""
-        fi
 
-        FREE_KB=$(grep MemTotal: /proc/meminfo | awk '{print $2}')
-        FREE_BYTES=$(( ${FREE_KB} * 1024 ))
-        if [ ${TS_TUNE_MEMORY} -gt ${FREE_BYTES} ]; then
-            # Something weird is going on if the cgroups memory limit exceeds the total available
-            # amount of system memory reported by "free", which is the total amount of memory available on the host.
-            # Most likely, it is this issue: https://github.com/moby/moby/issues/18087 (if no limit is
-            # set, the max limit is set to the max 64 bit integer). In this case, we just leave
-            # TS_TUNE_MEMORY blank and let timescaledb-tune derive the memory itself using syscalls.
-            TS_TUNE_MEMORY=""
-        else
-            # Convert the bytes to MB so it plays nicely with timescaledb-tune
-            TS_TUNE_MEMORY="$(echo ${TS_TUNE_MEMORY} | awk '{print int($1 / 1024 / 1024)}')MB"
+    # test for numeric TS_TUNE_MEMORY
+    if [[ "${TS_TUNE_MEMORY}" =~ ^[0-9]+$ ]]; then
+        if [ "${TS_CGROUPS_MAX_MEM:-false}" != "false" ]; then
+            if [ "${TS_TUNE_MEMORY}" = "18446744073709551615" ]; then
+                # Bash seems to error out for numbers greater than signed 64-bit,
+                # so if the value of limit_in_bytes is the 64-bit UNSIGNED max value
+                # we should just bail out and hope timescaledb-tune can figure this
+                # out. If we don't, the next comparison is likely going to fail
+                # or it might store a negative value which will crash later.
+                TS_TUNE_MEMORY=""
+            fi
+
+            FREE_KB=$(grep MemTotal: /proc/meminfo | awk '{print $2}')
+            FREE_BYTES=$(( ${FREE_KB} * 1024 ))
+            if [ ${TS_TUNE_MEMORY} -gt ${FREE_BYTES} ]; then
+                # Something weird is going on if the cgroups memory limit exceeds the total available
+                # amount of system memory reported by "free", which is the total amount of memory available on the host.
+                # Most likely, it is this issue: https://github.com/moby/moby/issues/18087 (if no limit is
+                # set, the max limit is set to the max 64 bit integer). In this case, we just leave
+                # TS_TUNE_MEMORY blank and let timescaledb-tune derive the memory itself using syscalls.
+                TS_TUNE_MEMORY=""
+            else
+                # Convert the bytes to MB so it plays nicely with timescaledb-tune
+                TS_TUNE_MEMORY="$(echo ${TS_TUNE_MEMORY} | awk '{print int($1 / 1024 / 1024)}')MB"
+            fi
         fi
     fi
 fi
