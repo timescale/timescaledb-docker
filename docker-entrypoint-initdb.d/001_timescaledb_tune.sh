@@ -21,7 +21,14 @@ if [ -z "${TS_TUNE_MEMORY:-}" ]; then
     # Try with cgroups v2 first.
     if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
         TS_TUNE_MEMORY=$(cat /sys/fs/cgroup/memory.max)
-        TS_CGROUPS_MAX_MEM=true
+        case ${TS_TUNE_MEMORY} in
+            max)
+               TS_TUNE_MEMORY=""
+            ;;
+            *)
+               TS_CGROUPS_MAX_MEM=true
+            ;;
+        esac
     # cgroups v2 is not available, try with cgroups v1
     elif [ -f /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
         TS_TUNE_MEMORY=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes)
