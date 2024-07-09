@@ -21,7 +21,7 @@ TAG=-t $(TAG_VERSION) $(if $(BETA),,-t $(TAG_LATEST))
 TAG_OSS=-t $(TAG_VERSION)-oss $(if $(BETA),,-t $(TAG_LATEST)-oss)
 
 PGVECTOR_VERSION=v0.7.2
-PGAI_VERSION=v0.2.0
+PGAI_VERSION=v0.3.0
 
 default: image
 
