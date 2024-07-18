@@ -86,6 +86,7 @@ RUN set -ex \
                 ca-certificates \
                 git \
                 openssl \
+                openssl1.1-compat-dev \
                 openssl-dev \
                 tar \
     && mkdir -p /build/ \
