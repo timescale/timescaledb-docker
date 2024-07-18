@@ -22,6 +22,25 @@ FROM ${PREV_IMAGE} AS oldversions
 
 # Remove mock files
 RUN rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql
+RUN psql -f - <<EOF
+\pset tuples_only on
+\pset format unaligned
+\o /tmp/prev-ts-versions.txt
+select version
+from
+(
+    select
+      ((string_to_array(version, '.'))[1])::int
+    , ((string_to_array(version, '.'))[2])::int
+    , ((string_to_array(version, '.'))[3])::int
+    , version
+    from pg_catalog.pg_available_extension_versions
+    where name = 'timescaledb'
+    order by 1,2,3
+) x
+;
+\q
+EOF
 
 ############################
 # Now build image and copy in tools
@@ -79,17 +98,17 @@ COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
 COPY --from=oldversions /usr/local/lib/postgresql/timescaledb-*.so /usr/local/lib/postgresql/
 COPY --from=oldversions /usr/local/share/postgresql/extension/timescaledb--*.sql /usr/local/share/postgresql/extension/
-COPY --from=oldversions /usr/lib/libssl.so.1.1 /usr/lib/
+COPY --from=oldversions /tmp/prev-ts-versions.txt /tmp/
 
 ARG TS_VERSION
 RUN set -ex \
-    && apk add --no-cache --virtual .fetch-deps \
-                ca-certificates \
-                git \
-                openssl \
-                openssl-dev \
-                tar \
-    && mkdir -p /build/ \
+    apk add --no-cache --virtual .fetch-deps \
+            ca-certificates \
+            git \
+            openssl \
+            openssl-dev \
+            tar; \
+    mkdir -p /build/ ; \
     && git clone https://github.com/timescale/timescaledb /build/timescaledb \
     \
     && apk add --no-cache --virtual .build-deps \
@@ -102,6 +121,15 @@ RUN set -ex \
                 cmake \
                 util-linux-dev \
     \
+    # Build prev versions \
+    && prev_ts_versions_file="/tmp/prev-ts-versions.txt" \
+    && while IFS= read -r version; do \
+         echo "$version"; \
+         cd /build/timescale && rm -rf build; \
+         git checkout $version; \
+         ./bootstrap -DCMAKE_BUILD_TYPE=RelWithDebInfo -DREGRESS_CHECKS=OFF -DTAP_CHECKS=OFF -DGENERATE_DOWNGRADE_SCRIPT=ON -DWARNINGS_AS_ERRORS=OFF -DPROJECT_INSTALL_METHOD="docker"${OSS_ONLY}; \
+         cd build && make install; \
+       done < "prev_ts_versions_file" \
     # Build current version \
     && cd /build/timescaledb && rm -fr build \
     && git checkout ${TS_VERSION} \
