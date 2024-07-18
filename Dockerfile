@@ -79,6 +79,7 @@ COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
 COPY --from=oldversions /usr/local/lib/postgresql/timescaledb-*.so /usr/local/lib/postgresql/
 COPY --from=oldversions /usr/local/share/postgresql/extension/timescaledb--*.sql /usr/local/share/postgresql/extension/
+COPY --from=oldversions /usr/lib/libssl.so.1.1 /usr/lib/
 
 ARG TS_VERSION
 RUN set -ex \
@@ -86,7 +87,6 @@ RUN set -ex \
                 ca-certificates \
                 git \
                 openssl \
-                openssl1.1-compat-dev \
                 openssl-dev \
                 tar \
     && mkdir -p /build/ \
