@@ -16,12 +16,12 @@ RUN apk update && apk add --no-cache git gcc musl-dev \
 ############################
 # Grab old versions from previous version
 ############################
-ARG PG_VERSION
-ARG PREV_IMAGE
-FROM ${PREV_IMAGE} AS oldversions
-
-# Remove mock files
-RUN rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql
+#ARG PG_VERSION
+#ARG PREV_IMAGE
+#FROM ${PREV_IMAGE} AS oldversions
+#
+## Remove mock files
+#RUN rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql
 
 ############################
 # Now build image and copy in tools
@@ -77,9 +77,11 @@ RUN set -ex; \
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
-COPY --from=oldversions /usr/local/lib/postgresql/timescaledb-*.so /usr/local/lib/postgresql/
-COPY --from=oldversions /usr/local/share/postgresql/extension/timescaledb--*.sql /usr/local/share/postgresql/extension/
+#COPY --from=oldversions /usr/local/lib/postgresql/timescaledb-*.so /usr/local/lib/postgresql/
+#COPY --from=oldversions /usr/local/share/postgresql/extension/timescaledb--*.sql /usr/local/share/postgresql/extension/
 
 ARG TS_VERSION
+ARG PG_MAJOR_VERSION
+ARG OSS_ONLY
 COPY build_timescaledb.sh /tmp/
 RUN /tmp/build_timescaledb.sh "$(PG_MAJOR_VERSION)" "$(OSS_ONLY)"
