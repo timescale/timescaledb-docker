@@ -82,44 +82,4 @@ COPY --from=oldversions /usr/local/share/postgresql/extension/timescaledb--*.sql
 
 ARG TS_VERSION
 COPY build_timescaledb.sh /tmp/
-RUN /tmp/build_timescaledb.sh "$(PG_VERSION)" "$(OSS_ONLY)"
-#RUN set -ex \
-#    apk add --no-cache --virtual .fetch-deps \
-#            ca-certificates \
-#            git \
-#            openssl \
-#            openssl-dev \
-#            tar; \
-#    mkdir -p /build/ ; \
-#    && git clone https://github.com/timescale/timescaledb /build/timescaledb \
-#    \
-#    && apk add --no-cache --virtual .build-deps \
-#                coreutils \
-#                dpkg-dev dpkg \
-#                gcc \
-#                krb5-dev \
-#                libc-dev \
-#                make \
-#                cmake \
-#                util-linux-dev \
-#    \
-#    # Build prev versions \
-#    && prev_ts_versions_file="/tmp/prev-ts-versions.txt" \
-#    && while IFS= read -r version; do \
-#         echo "$version"; \
-#         cd /build/timescale && rm -rf build; \
-#         git checkout $version; \
-#         ./bootstrap -DCMAKE_BUILD_TYPE=RelWithDebInfo -DREGRESS_CHECKS=OFF -DTAP_CHECKS=OFF -DGENERATE_DOWNGRADE_SCRIPT=ON -DWARNINGS_AS_ERRORS=OFF -DPROJECT_INSTALL_METHOD="docker"${OSS_ONLY}; \
-#         cd build && make install; \
-#       done < "prev_ts_versions_file" \
-#    # Build current version \
-#    && cd /build/timescaledb && rm -fr build \
-#    && git checkout ${TS_VERSION} \
-#    && ./bootstrap -DCMAKE_BUILD_TYPE=RelWithDebInfo -DREGRESS_CHECKS=OFF -DTAP_CHECKS=OFF -DGENERATE_DOWNGRADE_SCRIPT=ON -DWARNINGS_AS_ERRORS=OFF -DPROJECT_INSTALL_METHOD="docker"${OSS_ONLY} \
-#    && cd build && make install \
-#    && cd ~ \
-#    \
-#    && if [ "${OSS_ONLY}" != "" ]; then rm -f $(pg_config --pkglibdir)/timescaledb-tsl-*.so; fi \
-#    && apk del .fetch-deps .build-deps \
-#    && rm -rf /build \
-#    && sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'timescaledb,\2'/;s/,'/'/" /usr/local/share/postgresql/postgresql.conf.sample
+RUN /tmp/build_timescaledb.sh "$(PG_MAJOR_VERSION)" "$(OSS_ONLY)"
