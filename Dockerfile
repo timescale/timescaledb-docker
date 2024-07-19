@@ -82,7 +82,7 @@ COPY --from=oldversions /usr/local/share/postgresql/extension/timescaledb--*.sql
 
 ARG TS_VERSION
 COPY build_timescaledb.sh /tmp/
-RUN bash /tmp/build_timescaledb.sh
+RUN /tmp/build_timescaledb.sh "$(PG_VERSION)" "$(OSS_ONLY)"
 #RUN set -ex \
 #    apk add --no-cache --virtual .fetch-deps \
 #            ca-certificates \
