@@ -5,6 +5,7 @@ TS_TUNE_MEMORY=${TS_TUNE_MEMORY:-""}
 TS_TUNE_NUM_CPUS=${TS_TUNE_NUM_CPUS:-""}
 TS_TUNE_MAX_CONNS=${TS_TUNE_MAX_CONNS:-""}
 TS_TUNE_MAX_BG_WORKERS=${TS_TUNE_MAX_BG_WORKERS:-""}
+TS_TUNE_WAL_DISK_SIZE=${TS_TUNE_WAL_DISK_SIZE:-""}
 
 if [ ! -z "${NO_TS_TUNE:-}" ]; then
     # The user has explicitly requested not to run timescaledb-tune; exit this script
@@ -95,8 +96,12 @@ if [ ! -z "${TS_TUNE_MAX_BG_WORKERS:-}" ]; then
     TS_TUNE_MAX_BG_WORKERS_FLAGS=--max-bg-workers=${TS_TUNE_MAX_BG_WORKERS}
 fi
 
+if [ ! -z "${TS_TUNE_WAL_DISK_SIZE:-}" ]; then
+    TS_TUNE_WAL_DISK_SIZE_FLAGS=--wal-disk-size="${TS_TUNE_WAL_DISK_SIZE}"
+fi
+
 if [ ! -z "${PG_MAJOR}" ]; then
     TS_TUNE_PG_VERSION=--pg-version=${PG_MAJOR}
 fi
 
-/usr/local/bin/timescaledb-tune --quiet --yes --conf-path="${POSTGRESQL_CONF_DIR}/postgresql.conf" ${TS_TUNE_MEMORY_FLAGS} ${TS_TUNE_NUM_CPUS_FLAGS} ${TS_TUNE_MAX_CONNS_FLAGS} ${TS_TUNE_MAX_BG_WORKERS_FLAGS} ${TS_TUNE_PG_VERSION}
+/usr/local/bin/timescaledb-tune --quiet --yes --conf-path="${POSTGRESQL_CONF_DIR}/postgresql.conf" ${TS_TUNE_MEMORY_FLAGS} ${TS_TUNE_NUM_CPUS_FLAGS} ${TS_TUNE_MAX_CONNS_FLAGS} ${TS_TUNE_MAX_BG_WORKERS_FLAGS} ${TS_TUNE_WAL_DISK_SIZE_FLAGS} ${TS_TUNE_PG_VERSION}
