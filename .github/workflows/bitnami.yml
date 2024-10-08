@@ -2,6 +2,8 @@ name: Release Bitnami Image
 on:
   push:
     branches: [ release_docker, dev-build ]
+  pull_request:
+    paths: .github/workflows/bitnami.yml
   workflow_dispatch:
     inputs:
       version:
@@ -16,7 +18,7 @@ on:
         default: false
 env:
   ORG: timescale #timescaledev
-  TS_VERSION: ${{ github.event.inputs.version || '2.15.0' }}
+  TS_VERSION: ${{ github.event.inputs.version || '2.17.0' }}
 jobs:
 
   # Build bitnami images of TimscaleDB.
@@ -29,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [14, 15, 16]
+        pg: [14, 15, 16, 17]
         base-image: [postgresql, postgresql-repmgr]
 
     steps:
