@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [14, 15, 16]
+        pg: [14, 15, 16, 17]
         type: ['normal', 'repmgr-bitnami', 'bitnami']
     steps:
       - name: Check out the source

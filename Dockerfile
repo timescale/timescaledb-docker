@@ -35,32 +35,37 @@ LABEL maintainer="Timescale https://www.timescale.com"
 
 ARG PG_VERSION
 RUN set -ex; \
-    apk update; \
-    apk add --no-cache \
-        postgresql${PG_VERSION}-plpython3
+    if [ "$PG_VERSION" -lt 17 ]; then \
+        apk update; \
+        apk add --no-cache \
+            postgresql${PG_VERSION}-plpython3; \
+    fi
 
 ARG PGVECTOR_VERSION
+ARG PG_VERSION
 RUN set -ex; \
-    apk update; \
-    apk add --no-cache --virtual .vector-deps \
-        postgresql${PG_VERSION}-dev \
-        git \
-        build-base \
-        clang15 \
-        llvm15-dev \
-        llvm15; \
-    git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
-    cd /build/pgvector; \
-    make; \
-    make install; \
-    apk del .vector-deps
+    if [ "$PG_VERSION" -lt 17 ]; then \
+        apk update; \
+        apk add --no-cache --virtual .vector-deps \
+            postgresql${PG_VERSION}-dev \
+            git \
+            build-base \
+            clang15 \
+            llvm15-dev \
+            llvm15; \
+        git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
+        cd /build/pgvector; \
+        make; \
+        make install; \
+        apk del .vector-deps; \
+    fi
 
-# install pgai only on pg16+ and not on 32 bit arm
+# install pgai only on pg16 and not on 32 bit arm
 ARG PGAI_VERSION
 ARG PG_MAJOR_VERSION
 ARG TARGETARCH
 RUN set -ex; \
-    if [ "$PG_MAJOR_VERSION" -gt 15 ] && [ "$TARGETARCH" != "arm" ]; then \
+    if [ "$PG_MAJOR_VERSION" -eq 16 ] && [ "$TARGETARCH" != "arm" ]; then \
         apk update; \
         apk add --no-cache --virtual .pgai-deps \
             git \

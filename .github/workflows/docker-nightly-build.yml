@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - cron_build
+  pull_request:
+    paths: .github/workflows/docker-nightly-build.yml
 
   workflow_dispatch:
 
@@ -26,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [14, 15, 16]
+        pg: [14, 15, 16, 17]
 
     steps:
     - uses: actions/checkout@v4
