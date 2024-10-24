@@ -74,9 +74,8 @@ RUN set -ex; \
             python3-dev \
             py3-pip; \
         git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
-        cp /build/pgai/ai--*.sql /usr/local/share/postgresql/extension/; \
-        cp /build/pgai/ai.control /usr/local/share/postgresql/extension/; \
-        pip install --verbose --break-system-packages -r /build/pgai/requirements.txt; \
+        cd /build/pgai; \
+        PG_BIN="/usr/local/bin" PG_MAJOR=${PG_MAJOR_VERSION} make install; \
         apk del .pgai-deps; \
     fi
 
