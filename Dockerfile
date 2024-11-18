@@ -75,7 +75,7 @@ RUN set -ex; \
             py3-pip; \
         git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
         cd /build/pgai; \
-        PG_BIN="/usr/local/bin" PG_MAJOR=${PG_MAJOR_VERSION} make install; \
+        PG_BIN="/usr/local/bin" PG_MAJOR=${PG_MAJOR_VERSION} ./projects/extension/build.py install; \
         apk del .pgai-deps; \
     fi
 
