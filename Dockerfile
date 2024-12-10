@@ -60,21 +60,25 @@ RUN set -ex; \
         apk del .vector-deps; \
     fi
 
-# install pgai only on pg16 and not on 32 bit arm
+# install pgai only on pg16+ and not on 32 bit arm
 ARG PGAI_VERSION
 ARG PG_MAJOR_VERSION
 ARG TARGETARCH
 RUN set -ex; \
-    if [ "$PG_MAJOR_VERSION" -eq 16 ] && [ "$TARGETARCH" != "arm" ]; then \
+    if [ "$PG_MAJOR_VERSION" -ge 16 ] && [ "$TARGETARCH" != "arm" ]; then \
         apk update; \
         apk add --no-cache --virtual .pgai-deps \
             git \
             build-base \
             cargo \
+            cmake \
             python3-dev \
+            apache-arrow-dev \
             py3-pip; \
         git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
         cd /build/pgai; \
+        # note: this is a hack. pyarrow will be built from source, so must be pinned to this arrow version \
+        echo pyarrow==$(pkg-config --modversion arrow) >> ./projects/extension/requirements.txt; \
         PG_BIN="/usr/local/bin" PG_MAJOR=${PG_MAJOR_VERSION} ./projects/extension/build.py install; \
         apk del .pgai-deps; \
     fi
