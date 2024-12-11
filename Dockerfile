@@ -1,6 +1,7 @@
 ARG PG_VERSION
 ARG PREV_IMAGE
 ARG TS_VERSION
+ARG ALPINE_VERSION
 ############################
 # Build tools binaries in separate image
 ############################
@@ -27,7 +28,8 @@ RUN rm -f $(pg_config --sharedir)/extension/timescaledb*mock*.sql
 # Now build image and copy in tools
 ############################
 ARG PG_VERSION
-FROM postgres:${PG_VERSION}-alpine3.20
+ARG ALPINE_VERSION
+FROM postgres:${PG_VERSION}-alpine${ALPINE_VERSION}
 ARG OSS_ONLY
 
 LABEL maintainer="Timescale https://www.timescale.com"
@@ -35,30 +37,27 @@ LABEL maintainer="Timescale https://www.timescale.com"
 
 ARG PG_VERSION
 RUN set -ex; \
-    if [ "$PG_VERSION" -lt 17 ]; then \
-        apk update; \
-        apk add --no-cache \
-            postgresql${PG_VERSION}-plpython3; \
-    fi
+    apk update; \
+    apk add --no-cache \
+        postgresql${PG_VERSION}-plpython3;
 
 ARG PGVECTOR_VERSION
 ARG PG_VERSION
+ARG CLANG_VERSION
 RUN set -ex; \
-    if [ "$PG_VERSION" -lt 17 ]; then \
-        apk update; \
-        apk add --no-cache --virtual .vector-deps \
-            postgresql${PG_VERSION}-dev \
-            git \
-            build-base \
-            clang15 \
-            llvm15-dev \
-            llvm15; \
-        git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
-        cd /build/pgvector; \
-        make; \
-        make install; \
-        apk del .vector-deps; \
-    fi
+    apk update; \
+    apk add --no-cache --virtual .vector-deps \
+        postgresql${PG_VERSION}-dev \
+        git \
+        build-base \
+        clang${CLANG_VERSION} \
+        llvm${CLANG_VERSION}-dev \
+        llvm${CLANG_VERSION}; \
+    git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
+    cd /build/pgvector; \
+    make; \
+    make install; \
+    apk del .vector-deps;
 
 # install pgai only on pg16+ and not on 32 bit arm
 ARG PGAI_VERSION
