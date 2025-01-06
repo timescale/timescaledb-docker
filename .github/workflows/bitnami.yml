@@ -31,8 +31,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [14, 15, 16, 17]
-        base-image: [postgresql, postgresql-repmgr]
+        pg: [17]
+        base-image: [postgresql]
 
     steps:
       - uses: actions/checkout@v4
