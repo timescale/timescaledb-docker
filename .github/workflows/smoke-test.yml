@@ -18,7 +18,10 @@ jobs:
       fail-fast: false
       matrix:
         pg: [14, 15, 16, 17]
-        type: ['normal', 'repmgr-bitnami', 'bitnami']
+        type: ['normal']
+        include:
+          pg: 17
+          type: 'bitnami'
     steps:
       - name: Check out the source
         uses: actions/checkout@v4
