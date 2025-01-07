@@ -20,8 +20,8 @@ jobs:
         pg: [14, 15, 16, 17]
         type: ['normal']
         include:
-          pg: 17
-          type: 'bitnami'
+          - pg: 17
+            type: 'bitnami'
     steps:
       - name: Check out the source
         uses: actions/checkout@v4
