@@ -70,10 +70,14 @@ RUN set -ex; \
             git \
             build-base \
             cargo \
+            cmake \
             python3-dev \
+            apache-arrow-dev \
             py3-pip; \
         git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
         cd /build/pgai; \
+        # note: this is a hack. pyarrow will be built from source, so must be pinned to this arrow version \
+        echo pyarrow==$(pkg-config --modversion arrow) >> ./projects/extension/requirements.txt; \
         if [ "$TARGETARCH" == "386" ]; then \
             # note: pinned because pandas 2.2.0-2.2.3 on i386 is affected by https://github.com/pandas-dev/pandas/issues/59905 \
             echo pandas==2.1.4 >> ./projects/extension/requirements.txt; \
