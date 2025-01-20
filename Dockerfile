@@ -66,21 +66,30 @@ ARG TARGETARCH
 RUN set -ex; \
     if [ "$PG_MAJOR_VERSION" -ge 16 ] && [ "$TARGETARCH" != "arm" ]; then \
         apk update; \
+        # install shared libraries required by pyarrow needed at runtime
+        apk add libarrow libparquet; \
+        # install required dependencies for building pyarrow from source
         apk add --no-cache --virtual .pgai-deps \
             git \
             build-base \
             cargo \
             cmake \
             python3-dev \
-            apache-arrow-dev \
-            py3-pip; \
+            py3-pip \
+            apache-arrow-dev; \
+        # pgai requires pip 23.0.1 or greater due to the use of --break-system-packages flag
+        if [ "$(pip --version | awk '{print $2; exit}')" \< "23.0.1" ]; then \
+            python3 -m pip install --upgrade pip==23.0.1; \
+        fi; \
         git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
         cd /build/pgai; \
         # note: this is a hack. pyarrow will be built from source, so must be pinned to this arrow version \
-        echo pyarrow==$(pkg-config --modversion arrow) >> ./projects/extension/requirements.txt; \
+        echo "pyarrow==$(pkg-config --modversion arrow)" > constraints.txt; \
+        export PIP_CONSTRAINT=$(pwd)/constraints.txt; \
         if [ "$TARGETARCH" == "386" ]; then \
             # note: pinned because pandas 2.2.0-2.2.3 on i386 is affected by https://github.com/pandas-dev/pandas/issues/59905 \
-            echo pandas==2.1.4 >> ./projects/extension/requirements.txt; \
+            echo "pandas==2.1.4" >> constraints.txt; \
+            export PIP_CONSTRAINT=$(pwd)/constraints.txt; \
             # note: no prebuilt binaries for pillow on i386 \
             apk add --no-cache --virtual .pgai-deps-386 \
                 jpeg-dev \
