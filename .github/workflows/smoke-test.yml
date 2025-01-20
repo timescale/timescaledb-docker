@@ -17,7 +17,7 @@ env:
 jobs:
   smoketest:
     name: PG${{ matrix.pg }}-${{ matrix.type }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
