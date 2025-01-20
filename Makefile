@@ -5,7 +5,7 @@ ORG=timescaledev
 PG_VER=pg16
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 PG_MAJOR_VERSION=$(shell echo $(PG_VER_NUMBER) | cut -d. -f1)
-ifeq ($(shell test $(PG_MAJOR_VERSION) -ge 17; echo $$?),0)
+ifeq ($(shell test $(PG_MAJOR_VERSION) -ge 16; echo $$?),0)
   ALPINE_VERSION=3.21
   CLANG_VERSION=19
 else
