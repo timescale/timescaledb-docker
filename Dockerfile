@@ -60,12 +60,13 @@ RUN set -ex; \
     apk del .vector-deps;
 
 # install pgai only on pg16+ and not on 32 bit arm
-ARG PGAI_VERSION
+ARG PGAI_VERSIONS
 ARG PG_MAJOR_VERSION
 ARG TARGETARCH
 RUN set -ex; \
     if [ "$PG_MAJOR_VERSION" -ge 16 ] && [ "$TARGETARCH" != "arm" ]; then \
         apk update; \
+        apk add --no-cache libarrow libparquet; \
         apk add --no-cache --virtual .pgai-deps \
             git \
             build-base \
@@ -74,22 +75,28 @@ RUN set -ex; \
             python3-dev \
             apache-arrow-dev \
             py3-pip; \
-        git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
-        cd /build/pgai; \
-        # note: this is a hack. pyarrow will be built from source, so must be pinned to this arrow version \
-        echo pyarrow==$(pkg-config --modversion arrow) >> ./projects/extension/requirements.txt; \
-        if [ "$TARGETARCH" == "386" ]; then \
-            # note: pinned because pandas 2.2.0-2.2.3 on i386 is affected by https://github.com/pandas-dev/pandas/issues/59905 \
-            echo pandas==2.1.4 >> ./projects/extension/requirements.txt; \
-            # note: no prebuilt binaries for pillow on i386 \
-            apk add --no-cache --virtual .pgai-deps-386 \
-                jpeg-dev \
-                zlib-dev; \
-        fi; \
-        PG_BIN="/usr/local/bin" PG_MAJOR=${PG_MAJOR_VERSION} ./projects/extension/build.py install; \
+        for PGAI_VERSION in ${PGAI_VERSIONS}; do \
+            git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai-${PGAI_VERSION}; \
+            cd /build/pgai-${PGAI_VERSION}; \
+            echo "pyarrow==$(pkg-config --modversion arrow)" > constraints.txt; \
+            export PIP_CONSTRAINT=$(pwd)/constraints.txt; \
+            if [ "$TARGETARCH" == "386" ]; then \
+                # note: pinned because pandas 2.2.0-2.2.3 on i386 is affected by https://github.com/pandas-dev/pandas/issues/59905 \
+                echo pandas==2.1.4 >> constraints.txt; \
+                # note: no prebuilt binaries for pillow on i386 \
+                apk add --no-cache --virtual .pgai-deps-386 \
+                    jpeg-dev \
+                    zlib-dev; \
+            fi; \
+            if [ "${PGAI_VERSION}" != "extension-0.4.0" ]; then \
+                cd projects/extension; \
+            fi; \
+            PG_BIN="/usr/local/bin" PG_MAJOR=${PG_MAJOR_VERSION} ./build.py install-py; \
+            PG_BIN="/usr/local/bin" PG_MAJOR=${PG_MAJOR_VERSION} ./build.py install-sql; \
+        done; \
         if [ "$TARGETARCH" == "386" ]; then apk del .pgai-deps-386; fi; \
         apk del .pgai-deps; \
-    fi
+fi
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
