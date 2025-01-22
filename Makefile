@@ -5,7 +5,7 @@ ORG=timescaledev
 PG_VER=pg16
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 PG_MAJOR_VERSION=$(shell echo $(PG_VER_NUMBER) | cut -d. -f1)
-ifeq ($(shell test $(PG_MAJOR_VERSION) -ge 17; echo $$?),0)
+ifeq ($(shell test $(PG_MAJOR_VERSION) -ge 16; echo $$?),0)
   ALPINE_VERSION=3.21
   CLANG_VERSION=19
 else
@@ -28,7 +28,7 @@ TAG=-t $(TAG_VERSION) $(if $(BETA),,-t $(TAG_LATEST))
 TAG_OSS=-t $(TAG_VERSION)-oss $(if $(BETA),,-t $(TAG_LATEST)-oss)
 
 PGVECTOR_VERSION=v0.7.2
-PGAI_VERSION=extension-0.6.0
+PGAI_VERSION=extension-0.7.0
 
 COMMON_BUILD_ARGS= --build-arg TS_VERSION=$(TS_VERSION) \
 		--build-arg PREV_IMAGE=$(PREV_IMAGE) \
