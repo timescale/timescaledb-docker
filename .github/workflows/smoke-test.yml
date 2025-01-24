@@ -19,27 +19,13 @@ jobs:
       matrix:
         pg: [14, 15, 16, 17]
         type: ['normal']
-        include:
-          - pg: 17
-            type: 'bitnami'
     steps:
       - name: Check out the source
         uses: actions/checkout@v4
 
       - name: Build Docker Image for TimescaleDB
         run: |
-
-          if [ ${{ matrix.type }} == bitnami ]
-          then
-            cd bitnami
-            make image PG_BASE_IMAGE=postgresql PG_VER=pg${{ matrix.pg }} TAG_VERSION=smoketest-image BETA=1
-          elif [ ${{ matrix.type }} == repmgr-bitnami ]
-          then
-            cd bitnami
-            make image PG_BASE_IMAGE=postgresql-repmgr PG_VER=pg${{ matrix.pg }} TAG_VERSION=smoketest-image BETA=1
-          else
-            make image PG_VER=pg${{ matrix.pg }} TAG_VERSION=smoketest-image BETA=1
-          fi
+          make image PG_VER=pg${{ matrix.pg }} TAG_VERSION=smoketest-image BETA=1
 
       - name: Install psql
         run: sudo apt install postgresql-client
@@ -54,13 +40,6 @@ jobs:
           docker container rm smoketest-container || true
           docker run -d -p 5432:5432 \
             -e POSTGRES_PASSWORD=${PGPASSWORD} \
-            -e REPMGR_PASSWORD=${PGPASSWORD} \
-            -e REPMGR_PRIMARY_HOST=localhost \
-            -e REPMGR_PRIMARY_PORT=5432 \
-            -e REPMGR_PARTNER_NODES=pg-0,pg-1 \
-            -e REPMGR_NODE_NAME=pg-0 \
-            -e REPMGR_NODE_NETWORK_NAME=localhost \
-            -e REPMGR_PORT_NUMBER=5432 \
             --name smoketest-container smoketest-image
           for _ in {1..120}
           do
