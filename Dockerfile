@@ -77,10 +77,8 @@ RUN set -ex; \
             python3-dev \
             py3-pip \
             apache-arrow-dev; \
-        # pgai requires pip 23.0.1 or greater due to the use of --break-system-packages flag
-        if [ "$(pip --version | awk '{print $2; exit}')" \< "23.0.1" ]; then \
-            python3 -m pip install --upgrade pip==23.0.1; \
-        fi; \
+        # using uv reduces space required for pgai's dependencies \
+        python3 -m pip install uv --break-system-packages; \
         git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
         cd /build/pgai; \
         # note: this is a hack. pyarrow will be built from source, so must be pinned to this arrow version \
