@@ -66,8 +66,8 @@ ARG TARGETARCH
 RUN set -ex; \
     if [ "$PG_MAJOR_VERSION" -ge 16 ] && [ "$TARGETARCH" != "arm" ]; then \
         apk update; \
-        # install shared libraries required by pyarrow needed at runtime
-        apk add libarrow libparquet; \
+        # install shared libraries needed at runtime
+        apk add libarrow libparquet geos; \
         # install required dependencies for building pyarrow from source
         apk add --no-cache --virtual .pgai-deps \
             git \
@@ -76,7 +76,8 @@ RUN set -ex; \
             cmake \
             python3-dev \
             py3-pip \
-            apache-arrow-dev; \
+            apache-arrow-dev \
+            geos-dev; \
         # using uv reduces space required for pgai's dependencies \
         python3 -m pip install uv --break-system-packages; \
         git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
