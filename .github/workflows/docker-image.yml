@@ -18,7 +18,7 @@ on:
         default: false
 env:
   ORG: timescale #timescaledev
-  TS_VERSION: ${{ github.event.inputs.version || '2.17.0' }}
+  TS_VERSION: ${{ github.event.inputs.version || '2.18.1' }}
 jobs:
 
   # Build multi-arch TimescaleDB images for both TSL and OSS code.
@@ -51,6 +51,10 @@ jobs:
 
       - name: Build and push multi-platform Docker image for TimescaleDB
         run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]
+          then
+              export ORG=timescaledev
+          fi
           if [ "${{ github.event.inputs.no_tag_latest }}" == "true" ]
           then
               export BETA=1
