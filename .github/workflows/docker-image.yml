@@ -3,7 +3,6 @@ on:
   push:
     branches: [ release_docker, dev-build ]
   pull_request:
-    paths: .github/workflows/docker-image.yml
   workflow_dispatch:
     inputs:
       version:
@@ -15,15 +14,17 @@ on:
         description: 'Do not tag the published images as latest'
         type: boolean
         required: false
-        default: false
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  ORG: timescale #timescaledev
-  TS_VERSION: ${{ github.event.inputs.version || '2.18.1' }}
+  ORG: timescaledev #timescaledev
+  TS_VERSION: ${{ github.event.inputs.version || '2.18.2' }}
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
 jobs:
 
   # Build multi-arch TimescaleDB images for both TSL and OSS code.
@@ -65,13 +66,14 @@ jobs:
 
       - name: Build and push multi-platform Docker image for TimescaleDB
         run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]
+          export BETA=1
+          if [ "${{ github.event.inputs.no_tag_latest }}" == "false" ]
           then
-              export ORG=timescaledev
-          fi
-          if [ "${{ github.event.inputs.no_tag_latest }}" == "true" ]
-          then
-              export BETA=1
+              if [[ "${BRANCH_NAME}" =~ ^(main|release_docker)$ ]];
+              then
+                  export ORG=timescale
+              fi
+              export BETA=0
           fi
           make multi${{ matrix.oss }} ORG=$ORG PG_VER=pg${{ matrix.pg }} \
               TS_VERSION=$TS_VERSION PREV_EXTRA="${{ matrix.oss }}" BETA=$BETA
