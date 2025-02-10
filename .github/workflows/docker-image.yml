@@ -3,7 +3,6 @@ on:
   push:
     branches: [ release_docker, dev-build ]
   pull_request:
-    paths: .github/workflows/docker-image.yml
   workflow_dispatch:
     inputs:
       version:
@@ -25,7 +24,7 @@ jobs:
   timescaledb:
 
     name: PG${{ matrix.pg }}${{ matrix.oss }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -54,6 +53,7 @@ jobs:
           if [ "${{ github.event_name }}" == "pull_request" ]
           then
               export ORG=timescaledev
+              export BETA=1
           fi
           if [ "${{ github.event.inputs.no_tag_latest }}" == "true" ]
           then
