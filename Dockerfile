@@ -36,68 +36,78 @@ LABEL maintainer="Timescale https://www.timescale.com"
 
 
 ARG PG_VERSION
+ARG PG_MAJOR_VERSION
+ARG ALPINE_VERSION
 RUN set -ex; \
+    echo "https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/community/" >> /etc/apk/repositories; \
     apk update; \
-    apk add --no-cache \
-        postgresql${PG_VERSION}-plpython3;
+    if [ "$PG_MAJOR_VERSION" -ge 16 ] ; then \
+        apk add --no-cache postgresql${PG_VERSION}-plpython3; \
+    fi
 
 ARG PGVECTOR_VERSION
 ARG PG_VERSION
 ARG CLANG_VERSION
+ARG PG_MAJOR_VERSION
 RUN set -ex; \
     apk update; \
-    apk add --no-cache --virtual .vector-deps \
-        postgresql${PG_VERSION}-dev \
-        git \
-        build-base \
-        clang${CLANG_VERSION} \
-        llvm${CLANG_VERSION}-dev \
-        llvm${CLANG_VERSION}; \
-    git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
-    cd /build/pgvector; \
-    make; \
-    make install; \
-    apk del .vector-deps;
-
-# install pgai only on pg16+ and not on 32 bit arm
-ARG PGAI_VERSION
-ARG PG_MAJOR_VERSION
-ARG TARGETARCH
-RUN set -ex; \
-    if [ "$PG_MAJOR_VERSION" -ge 16 ] && [ "$TARGETARCH" != "arm" ]; then \
-        apk update; \
-        # install shared libraries needed at runtime
-        apk add libarrow libparquet geos; \
-        # install required dependencies for building pyarrow from source
-        apk add --no-cache --virtual .pgai-deps \
+    if [ "$PG_MAJOR_VERSION" -ge 17 ] ; then \
+        apk add --no-cache postgresql-pgvector; \
+    else \
+        apk add --no-cache --virtual .vector-deps \
+            postgresql${PG_VERSION}-dev \
             git \
             build-base \
-            cargo \
-            cmake \
-            python3-dev \
-            py3-pip \
-            apache-arrow-dev \
-            geos-dev; \
-        # using uv reduces space required for pgai's dependencies \
-        python3 -m pip install uv --break-system-packages; \
-        git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
-        cd /build/pgai; \
-        # note: this is a hack. pyarrow will be built from source, so must be pinned to this arrow version \
-        echo "pyarrow==$(pkg-config --modversion arrow)" > constraints.txt; \
-        export PIP_CONSTRAINT=$(pwd)/constraints.txt; \
-        if [ "$TARGETARCH" == "386" ]; then \
-            # note: pinned because pandas 2.2.0-2.2.3 on i386 is affected by https://github.com/pandas-dev/pandas/issues/59905 \
-            echo "pandas==2.1.4" >> constraints.txt; \
-            export PIP_CONSTRAINT=$(pwd)/constraints.txt; \
-            # note: no prebuilt binaries for pillow on i386 \
-            apk add --no-cache --virtual .pgai-deps-386 \
-                jpeg-dev \
-                zlib-dev; \
-        fi; \
-        PG_BIN="/usr/local/bin" PG_MAJOR=${PG_MAJOR_VERSION} ./projects/extension/build.py install; \
-        if [ "$TARGETARCH" == "386" ]; then apk del .pgai-deps-386; fi; \
-        apk del .pgai-deps; \
+            clang${CLANG_VERSION} \
+            llvm${CLANG_VERSION}-dev \
+            llvm${CLANG_VERSION}; \
+        git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
+        cd /build/pgvector; \
+        make; \
+        make install; \
+        apk del .vector-deps; \
     fi
+
+# # install pgai only on pg16+ and not on 32 bit arm
+# ARG PGAI_VERSION
+# ARG PG_MAJOR_VERSION
+# ARG TARGETARCH
+# RUN set -ex; \
+#     if [ "$PG_MAJOR_VERSION" -ge 16 ] && [ "$TARGETARCH" != "arm" ]; then \
+#         apk update; \
+#         # install shared libraries needed at runtime
+#         apk add libarrow libparquet geos py3-pandas; \
+#         # install required dependencies for building pyarrow from source
+#         apk add --no-cache --virtual .pgai-deps \
+#             git \
+#             build-base \
+#             cargo \
+#             cmake \
+#             python3-dev \
+#             py3-pip \
+#             apache-arrow-dev \
+#             geos-dev; \
+#         if [ "$(pip --version | awk '{print $2; exit}')" \< "23.0.1" ]; then \
+#             python3 -m pip install --upgrade pip==23.0.1; \
+#         fi; \
+#         git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
+#         cd /build/pgai; \
+#         # note: this is a hack. pyarrow will be built from source, so must be pinned to this arrow version \
+#         echo "pyarrow==$(pkg-config --modversion arrow)" > constraints.txt; \
+#         export PIP_CONSTRAINT=$(pwd)/constraints.txt; \
+#         if [ "$TARGETARCH" == "386" ]; then \
+#             # note: pinned because pandas 2.2.0-2.2.3 on i386 is affected by https://github.com/pandas-dev/pandas/issues/59905 \
+#             echo "pandas==2.1.4" >> constraints.txt; \
+#             export PIP_CONSTRAINT=$(pwd)/constraints.txt; \
+#             # note: no prebuilt binaries for pillow on i386 \
+#             apk add --no-cache --virtual .pgai-deps-386 \
+#                 jpeg-dev \
+#                 zlib-dev; \
+#         fi; \
+#         PG_BIN="/usr/local/bin" PG_MAJOR=${PG_MAJOR_VERSION} ./projects/extension/build.py install; \
+#         if [ "$TARGETARCH" == "386" ]; then apk del .pgai-deps-386; fi; \
+#         apk del .pgai-deps; \
+#     fi
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
