@@ -5,14 +5,14 @@ ARG ALPINE_VERSION
 ############################
 # Build tools binaries in separate image
 ############################
-ARG GO_VERSION=1.22.4
-FROM golang:${GO_VERSION}-alpine AS tools
-
-ENV TOOLS_VERSION 0.8.1
-
-RUN apk update && apk add --no-cache git gcc musl-dev \
-    && go install github.com/timescale/timescaledb-tune/cmd/timescaledb-tune@latest \
-    && go install github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy@latest
+# ARG GO_VERSION=1.22.4
+# FROM golang:${GO_VERSION}-alpine AS tools
+# 
+# ENV TOOLS_VERSION 0.8.1
+# 
+# RUN apk update && apk add --no-cache git gcc musl-dev \
+#     && go install github.com/timescale/timescaledb-tune/cmd/timescaledb-tune@latest \
+#     && go install github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy@latest
 
 ############################
 # Grab old versions from previous version
@@ -45,19 +45,21 @@ ARG PGVECTOR_VERSION
 ARG PG_VERSION
 ARG CLANG_VERSION
 RUN set -ex; \
-    apk update; \
-    apk add --no-cache --virtual .vector-deps \
-        postgresql${PG_VERSION}-dev \
-        git \
-        build-base \
-        clang${CLANG_VERSION} \
-        llvm${CLANG_VERSION}-dev \
-        llvm${CLANG_VERSION}; \
-    git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
-    cd /build/pgvector; \
-    make; \
-    make install; \
-    apk del .vector-deps;
+        if [ "$PG_MAJOR_VERSION" -ge 16 ] && [ "$TARGETARCH" != "arm" ]; then \
+        apk update; \
+        apk add --no-cache --virtual .vector-deps \
+            postgresql${PG_VERSION}-dev \
+            git \
+            build-base \
+            clang${CLANG_VERSION} \
+            llvm${CLANG_VERSION}-dev \
+            llvm${CLANG_VERSION}; \
+        git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
+        cd /build/pgvector; \
+        make; \
+        make install; \
+        apk del .vector-deps; \
+    fi
 
 # install pgai only on pg16+ and not on 32 bit arm
 ARG PGAI_VERSION
@@ -100,9 +102,10 @@ RUN set -ex; \
     fi
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
-COPY --from=tools /go/bin/* /usr/local/bin/
+# COPY --from=tools /go/bin/* /usr/local/bin/
 COPY --from=oldversions /usr/local/lib/postgresql/timescaledb-*.so /usr/local/lib/postgresql/
 COPY --from=oldversions /usr/local/share/postgresql/extension/timescaledb--*.sql /usr/local/share/postgresql/extension/
+COPY --from=oldversions /usr/local/bin/timescaledb-* /usr/local/bin/
 
 ARG TS_VERSION
 RUN set -ex \
