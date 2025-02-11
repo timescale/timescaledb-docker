@@ -65,12 +65,21 @@ RUN set -ex; \
 ARG PGAI_VERSION
 ARG PG_MAJOR_VERSION
 ARG TARGETARCH
+
 RUN set -ex; \
     if [ "$PG_MAJOR_VERSION" -ge 16 ] && [ "$TARGETARCH" != "arm" ]; then \
         apk update; \
-        # install shared libraries needed at runtime
-        apk add libarrow libparquet geos; \
-        # install required dependencies for building pyarrow from source
+        # Install only essential runtime dependencies
+        apk add --no-cache geos \
+            curl; \
+        # Download and extract libarrow v0.19.0
+        curl -L -o /tmp/libarrow.tar.gz "https://downloads.apache.org/arrow/arrow-19.0.0/apache-arrow-19.0.0.tar.gz"; \
+        tar -xzf /tmp/libarrow.tar.gz -C /usr/local; \
+        rm -f /tmp/libarrow.tar.gz; \
+        \
+        # Export paths so Arrow is discoverable
+        export CMAKE_PREFIX_PATH=/usr/local/apache-arrow-19.0.0/cpp/src/arrow; \
+        # Install dependencies for building pyarrow from source
         apk add --no-cache --virtual .pgai-deps \
             git \
             build-base \
@@ -78,15 +87,19 @@ RUN set -ex; \
             cmake \
             python3-dev \
             py3-pip \
-            apache-arrow-dev \
             geos-dev; \
-        # using uv reduces space required for pgai's dependencies \
+        \
+        # Use uv to reduce space required for pgai dependencies
         python3 -m pip install uv --break-system-packages; \
+        \
+        # Clone and build pgai
         git clone --branch ${PGAI_VERSION} https://github.com/timescale/pgai.git /build/pgai; \
         cd /build/pgai; \
-        # note: this is a hack. pyarrow will be built from source, so must be pinned to this arrow version \
-        echo "pyarrow==$(pkg-config --modversion arrow)" > constraints.txt; \
+        \
+        # Ensure pyarrow version matches installed libarrow version
+        echo "pyarrow==0.19.0" > constraints.txt; \
         export PIP_CONSTRAINT=$(pwd)/constraints.txt; \
+        \
         if [ "$TARGETARCH" == "386" ]; then \
             # note: pinned because pandas 2.2.0-2.2.3 on i386 is affected by https://github.com/pandas-dev/pandas/issues/59905 \
             echo "pandas==2.1.4" >> constraints.txt; \
@@ -97,6 +110,7 @@ RUN set -ex; \
                 zlib-dev; \
         fi; \
         PG_BIN="/usr/local/bin" PG_MAJOR=${PG_MAJOR_VERSION} ./projects/extension/build.py install; \
+        \
         if [ "$TARGETARCH" == "386" ]; then apk del .pgai-deps-386; fi; \
         apk del .pgai-deps; \
     fi
