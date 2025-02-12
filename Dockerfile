@@ -71,6 +71,7 @@ RUN set -ex; \
         # install required dependencies for building pyarrow from source
         apk add --no-cache --virtual .pgai-deps \
             git \
+            gcompat \
             build-base \
             cargo \
             cmake \
