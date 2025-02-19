@@ -2,7 +2,7 @@ NAME=timescaledb
 # Default is to timescaledev to avoid unexpected push to the main repo
 # Set ORG to timescale in the caller
 ORG=timescaledev
-PG_VER=pg16
+PG_VER=pg17
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 PG_MAJOR_VERSION=$(shell echo $(PG_VER_NUMBER) | cut -d. -f1)
 ifeq ($(shell test $(PG_MAJOR_VERSION) -ge 16; echo $$?),0)
@@ -18,7 +18,7 @@ PREV_TS_IMAGE="timescale/timescaledb:$(PREV_TS_VERSION)-pg$(PG_VER_NUMBER)$(PREV
 PREV_IMAGE=$(shell if docker pull $(PREV_TS_IMAGE) >/dev/null; then echo "$(PREV_TS_IMAGE)"; else echo "postgres:$(PG_VER_NUMBER)-alpine"; fi )
 # Beta releases should not be tagged as latest, so BETA is used to track.
 BETA=$(findstring rc,$(TS_VERSION))
-PLATFORM=linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+PLATFORM=linux/amd64,linux/arm64
 
 # PUSH_MULTI can be set to nothing for dry-run without pushing during multi-arch build
 PUSH_MULTI=--push
@@ -44,6 +44,8 @@ default: image
 .multi_$(TS_VERSION)_$(PG_VER)_oss: Dockerfile
 	test -n "$(TS_VERSION)"  # TS_VERSION
 	test -n "$(PREV_TS_VERSION)"  # PREV_TS_VERSION
+	test -n "$(PREV_IMAGE)"  # PREV_IMAGE
+	test -n "$(ALPINE_VERSION)"  # ALPINE_VERSION
 	docker buildx create --platform $(PLATFORM) --name multibuild --use
 	docker buildx inspect multibuild --bootstrap
 	docker buildx build --platform $(PLATFORM) \
@@ -57,6 +59,7 @@ default: image
 	test -n "$(TS_VERSION)"  # TS_VERSION
 	test -n "$(PREV_TS_VERSION)"  # PREV_TS_VERSION
 	test -n "$(PREV_IMAGE)"  # PREV_IMAGE
+	test -n "$(ALPINE_VERSION)"  # ALPINE_VERSION
 	docker buildx create --platform $(PLATFORM) --name multibuild --use
 	docker buildx inspect multibuild --bootstrap
 	docker buildx build --platform $(PLATFORM) \
