@@ -84,11 +84,11 @@ RUN set -ex; \
         cd /build/pgai; \
         # note: this is a hack. pyarrow will be built from source, so must be pinned to this arrow version \
         echo "pyarrow==$(pkg-config --modversion arrow)" > constraints.txt; \
-        export PIP_CONSTRAINT=$(pwd)/constraints.txt; \
+        export UV_CONSTRAINT=$(pwd)/constraints.txt; \
         if [ "$TARGETARCH" == "386" ]; then \
             # note: pinned because pandas 2.2.0-2.2.3 on i386 is affected by https://github.com/pandas-dev/pandas/issues/59905 \
             echo "pandas==2.1.4" >> constraints.txt; \
-            export PIP_CONSTRAINT=$(pwd)/constraints.txt; \
+            export UV_CONSTRAINT=$(pwd)/constraints.txt; \
             # note: no prebuilt binaries for pillow on i386 \
             apk add --no-cache --virtual .pgai-deps-386 \
                 jpeg-dev \
