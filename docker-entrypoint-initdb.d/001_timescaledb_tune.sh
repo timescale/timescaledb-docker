@@ -63,7 +63,28 @@ fi
 
 if [ -z "${TS_TUNE_NUM_CPUS:-}" ]; then
     # See if we can get the container's available CPUs from the cgroups metadata
-    if [ -f /sys/fs/cgroup/cpuset/cpuset.cpus ]; then
+    # Try with cgroups v2 first.
+    if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
+        TS_TUNE_NUM_CPUS=$(cat /sys/fs/cgroup/cpu.max | awk '{print $1}')
+        TS_TUNE_NUM_CPUS_PERIOD=$(cat /sys/fs/cgroup/cpu.max | awk '{print $2}')
+        if [ "${TS_TUNE_NUM_CPUS_PERIOD}" != "100000" ]; then
+            # Detecting cpu via cgroup v2 with modified duration is not supported                                                                                                                                                                                            TS_TUNE_NUM_CPUS=""
+        else
+            case ${TS_TUNE_NUM_CPUS} in
+                max)
+                    TS_TUNE_NUM_CPUS=""
+                    ;;
+                *)
+                    if [ $(( ${TS_TUNE_NUM_CPUS} % 100000 )) -eq 0 ]; then
+                        TS_TUNE_NUM_CPUS=$(( ${TS_TUNE_NUM_CPUS} / 100000 ))
+                    else
+                        TS_TUNE_NUM_CPUS=$(( ( ${TS_TUNE_NUM_CPUS} / 100000 ) + 1 ))
+                    fi
+                    ;;
+            esac
+        fi
+    # cgroups v2 is not available, try with cgroups v1
+    elif [ -f /sys/fs/cgroup/cpuset/cpuset.cpus ]; then
         TS_TUNE_NUM_CPUS=$(cat /sys/fs/cgroup/cpuset/cpuset.cpus)
         if [[ ${TS_TUNE_NUM_CPUS} == *-* ]]; then
             # The CPU limits have been defined as a range (e.g., 0-3 for 4 CPUs). Subtract them and add 1
