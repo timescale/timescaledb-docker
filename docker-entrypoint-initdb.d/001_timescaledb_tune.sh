@@ -83,7 +83,7 @@ if [ -z "${TS_TUNE_NUM_CPUS:-}" ]; then
 
     if [ -n "${TS_TUNE_NUM_CPUS}" ]; then
         if [ "${TS_TUNE_NUM_CPUS_PERIOD}" != "100000" ]; then
-            # Detecting cpu via cgroup v2 with modified duration is not supported
+            # Detecting cpu via cgroups with modified duration is not supported
             TS_TUNE_NUM_CPUS=""
         else
             # Determine (integer) number of CPUs, rounding up
