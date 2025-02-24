@@ -24,6 +24,15 @@ jobs:
         pg: [14, 15, 16, 17]
         type: ['normal']
     steps:
+      # The github runners have a lot of space in /mnt, but apparently not enough in /. This step removes about 13G.
+      - name: remove unneeded runner software
+        run: |
+          df -h
+          du -chs     /usr/share/dotnet /usr/local/lib/android /opt/microsoft || true
+          sudo rm -fr /usr/share/dotnet /usr/local/lib/android /opt/microsoft || true
+          sudo docker image prune --all --force || true
+          df -h
+
       - name: Check out the source
         uses: actions/checkout@v4
 
