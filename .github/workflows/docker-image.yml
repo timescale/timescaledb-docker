@@ -8,13 +8,19 @@ on:
       version:
         description: 'Version to release'
         required: true
-      # This is a manual workaround until the latest tagging is fixed:
-      # https://github.com/timescale/timescaledb-docker/issues/205
-      no_tag_latest:
-        description: 'Do not tag the published images as latest'
+      registry:
+        description: 'Registry to use to push images'
+        type: choice
+        required: false
+        default: 'dev'
+        options:
+        - prod
+        - dev
+      tag_latest:
+        description: 'Tag the published images as latest'
         type: boolean
         required: false
-        default: true
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -67,13 +73,13 @@ jobs:
       - name: Build and push multi-platform Docker image for TimescaleDB
         run: |
           export BETA=1
-          if [ "${{ github.event.inputs.no_tag_latest }}" == "false" ]
+          if [ "${{ github.event.inputs.tag_latest }}" == "true" ]
           then
-              if [[ "${BRANCH_NAME}" =~ ^(main|release_docker)$ ]];
-              then
-                  export ORG=timescale
-              fi
               export BETA=0
+          fi
+          if [ "${{ github.event.inputs.registry }}" == "prod" ]
+          then
+              export ORG=timescale
           fi
           make multi${{ matrix.oss }} ORG=$ORG PG_VER=pg${{ matrix.pg }} \
               TS_VERSION=$TS_VERSION PREV_EXTRA="${{ matrix.oss }}" BETA=$BETA
