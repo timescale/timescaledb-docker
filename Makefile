@@ -17,7 +17,7 @@ PREV_TS_VERSION=$(shell wget --quiet -O - https://raw.githubusercontent.com/time
 PREV_TS_IMAGE="timescale/timescaledb:$(PREV_TS_VERSION)-pg$(PG_VER_NUMBER)$(PREV_EXTRA)"
 PREV_IMAGE=$(shell if docker pull $(PREV_TS_IMAGE) >/dev/null; then echo "$(PREV_TS_IMAGE)"; else echo "postgres:$(PG_VER_NUMBER)-alpine"; fi )
 # Beta releases should not be tagged as latest, so BETA is used to track.
-BETA=$(findstring rc,$(TS_VERSION))
+BETA=1
 PLATFORM=linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
 
 # PUSH_MULTI can be set to nothing for dry-run without pushing during multi-arch build
