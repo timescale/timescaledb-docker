@@ -75,7 +75,7 @@ jobs:
           export BETA=1
           if [ "${{ github.event.inputs.tag_latest }}" == "true" ]
           then
-              export BETA=0
+              export BETA=
           fi
           if [ "${{ github.event.inputs.registry }}" == "prod" ]
           then
