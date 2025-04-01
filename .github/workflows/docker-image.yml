@@ -3,6 +3,24 @@ on:
   push:
     branches: [ release_docker, dev-build ]
   pull_request:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
+      registry:
+        description: 'Registry to use to push images'
+        type: choice
+        required: false
+        default: 'dev'
+        options:
+        - prod
+        - dev
+      tag_latest:
+        description: 'Tag the published images as latest'
+        type: boolean
+        required: false
+        default: false
   workflow_dispatch:
     inputs:
       version:
