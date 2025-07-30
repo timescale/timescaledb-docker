@@ -60,7 +60,7 @@ RUN set -ex; \
         llvm${CLANG_VERSION}; \
     git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
     cd /build/pgvector; \
-    make; \
+    make OPTFLAGS=""; \
     make install; \
     apk del .vector-deps;
 
