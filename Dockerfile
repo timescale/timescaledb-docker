@@ -18,7 +18,7 @@ RUN apk update && apk add --no-cache git gcc musl-dev \
 # Grab old versions from previous version
 ############################
 ARG PG_VERSION
-ARG PREV_IMAGE
+ARG PREV_IMAGE=postgres:${PG_VERSION}-alpine
 FROM ${PREV_IMAGE} AS oldversions
 
 # Remove mock files
@@ -41,7 +41,7 @@ ARG ALPINE_VERSION
 RUN set -ex; \
     echo "https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/community/" >> /etc/apk/repositories; \
     apk update; \
-    if [ "$PG_MAJOR_VERSION" -ge 16 ] ; then \
+    if [ "$PG_MAJOR_VERSION" -ge 16 && "$PG_MAJOR_VERSION" -lt 18 ] ; then \
         apk add --no-cache postgresql${PG_VERSION}-plpython3; \
     fi
 
@@ -50,19 +50,21 @@ ARG PG_VERSION
 ARG CLANG_VERSION
 ARG PG_MAJOR_VERSION
 RUN set -ex; \
-    apk update; \
-    apk add --no-cache --virtual .vector-deps \
-        postgresql${PG_VERSION}-dev \
-        git \
-        build-base \
-        clang${CLANG_VERSION} \
-        llvm${CLANG_VERSION}-dev \
-        llvm${CLANG_VERSION}; \
-    git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
-    cd /build/pgvector; \
-    make OPTFLAGS=""; \
-    make install; \
-    apk del .vector-deps;
+    if [ "$PG_MAJOR_VERSION" -lt 18 ] ; then \
+        apk update; \
+        apk add --no-cache --virtual .vector-deps \
+            postgresql${PG_VERSION}-dev \
+            git \
+            build-base \
+            clang${CLANG_VERSION} \
+            llvm${CLANG_VERSION}-dev \
+            llvm${CLANG_VERSION}; \
+        git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
+        cd /build/pgvector; \
+        make OPTFLAGS=""; \
+        make install; \
+        apk del .vector-deps; \
+    fi
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
