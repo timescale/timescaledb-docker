@@ -7,15 +7,13 @@ on:
     inputs:
       version:
         description: 'Version to release'
+        type: string
         required: true
       registry:
         description: 'Registry to use to push images'
-        type: choice
+        type: string
         required: false
         default: 'dev'
-        options:
-        - prod
-        - dev
       tag_latest:
         description: 'Tag the published images as latest'
         type: boolean
@@ -46,7 +44,7 @@ concurrency:
 
 env:
   ORG: timescaledev #timescaledev
-  TS_VERSION: ${{ github.event.inputs.version || '2.18.2' }}
+  TS_VERSION: ${{ github.event.inputs.version || '2.23.0' }}
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
@@ -59,7 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [15, 16, 17]
+        pg: [15, 16, 17, 18]
         oss: [ "", "-oss" ]
     steps:
       # The github runners have a lot of space in /mnt, but apparently not enough in /. This step removes about 13G.
