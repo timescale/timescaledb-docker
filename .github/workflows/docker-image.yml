@@ -44,7 +44,7 @@ concurrency:
 
 env:
   ORG: timescaledev #timescaledev
-  TS_VERSION: ${{ github.event.inputs.version || '2.23.0' }}
+  TS_VERSION: ${{ github.event.inputs.version || '2.24.0' }}
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:

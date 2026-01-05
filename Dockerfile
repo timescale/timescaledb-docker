@@ -50,21 +50,19 @@ ARG PG_VERSION
 ARG CLANG_VERSION
 ARG PG_MAJOR_VERSION
 RUN set -ex; \
-    if [ "$PG_MAJOR_VERSION" -lt 18 ] ; then \
-        apk update; \
-        apk add --no-cache --virtual .vector-deps \
-            postgresql${PG_VERSION}-dev \
-            git \
-            build-base \
-            clang${CLANG_VERSION} \
-            llvm${CLANG_VERSION}-dev \
-            llvm${CLANG_VERSION}; \
-        git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
-        cd /build/pgvector; \
-        make OPTFLAGS=""; \
-        make install; \
-        apk del .vector-deps; \
-    fi
+    apk update; \
+    apk add --no-cache --virtual .vector-deps \
+        postgresql${PG_VERSION}-dev \
+        git \
+        build-base \
+        clang${CLANG_VERSION} \
+        llvm${CLANG_VERSION}-dev \
+        llvm${CLANG_VERSION}; \
+    git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
+    cd /build/pgvector; \
+    make OPTFLAGS=""; \
+    make install; \
+    apk del .vector-deps
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
 COPY --from=tools /go/bin/* /usr/local/bin/
