@@ -83,8 +83,8 @@ RUN set -ex \
     && apk add --no-cache --virtual .build-deps \
                 coreutils \
                 dpkg-dev dpkg \
+                icu-dev \
                 gcc \
-                krb5-dev \
                 libc-dev \
                 make \
                 cmake \
