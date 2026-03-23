@@ -46,7 +46,7 @@ jobs:
       run: echo ${TS_VERSION}
 
     - name: Login to DockerHub Registry
-      run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USER }} --password-stdin
+      run: echo ${{ secrets.ORG_DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.ORG_DOCKER_HUB_USERNAME }} --password-stdin
 
     - name: Build and push nightly Docker image for TimescaleDB
       run: make multi ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION="${TS_VERSION}" PLATFORM=$PLATFORM TAG="-t timescaledev/timescaledb:branch-${TS_VERSION}-pg${{ matrix.pg }}"
