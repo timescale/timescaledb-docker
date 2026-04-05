@@ -7,14 +7,12 @@ PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 PG_MAJOR_VERSION=$(shell echo $(PG_VER_NUMBER) | cut -d. -f1)
 ifeq ($(shell test $(PG_MAJOR_VERSION) -ge 18; echo $$?),0)
   ALPINE_VERSION=3.23
-  CLANG_VERSION=19
 else ifeq ($(shell test $(PG_MAJOR_VERSION) -ge 16; echo $$?),0)
-  ALPINE_VERSION=3.21
-  CLANG_VERSION=19
+  ALPINE_VERSION=3.23
 else
-  ALPINE_VERSION=3.20
-  CLANG_VERSION=15
+  ALPINE_VERSION=3.22
 endif
+CLANG_VERSION=19
 
 TS_VERSION=main
 PREV_TS_VERSION=$(shell wget --quiet -O - https://raw.githubusercontent.com/timescale/timescaledb/${TS_VERSION}/version.config | grep -P "(previous_version|update_from_version)" | sed -e 's!^[a-z_]\+_version = !!')
