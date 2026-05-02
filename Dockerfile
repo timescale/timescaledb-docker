@@ -5,7 +5,7 @@ ARG ALPINE_VERSION
 ############################
 # Build tools binaries in separate image
 ############################
-ARG GO_VERSION=1.22.4
+ARG GO_VERSION=1.26.2
 FROM golang:${GO_VERSION}-alpine AS tools
 
 ENV TOOLS_VERSION 0.8.1
