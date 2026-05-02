@@ -38,7 +38,7 @@ jobs:
       && contains(github.event.issue.labels.*.name, 'waiting-for-author')
     steps:
       - name: Check if organization member
-        uses: tspascoal/get-user-teams-membership@v3
+        uses: tspascoal/get-user-teams-membership@v4
         id: checkUserMember
         with:
          username: ${{ github.actor }}
