@@ -41,7 +41,7 @@ ARG ALPINE_VERSION
 RUN set -ex; \
     echo "https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/community/" >> /etc/apk/repositories; \
     apk update; \
-    if [ "$PG_MAJOR_VERSION" -ge 16 && "$PG_MAJOR_VERSION" -lt 18 ] ; then \
+    if [ "$PG_MAJOR_VERSION" -ge 16 ] && [ "$PG_MAJOR_VERSION" -lt 18 ] ; then \
         apk add --no-cache postgresql${PG_VERSION}-plpython3; \
     fi
 
