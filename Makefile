@@ -5,14 +5,13 @@ ORG=timescaledev
 PG_VER=pg17
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 PG_MAJOR_VERSION=$(shell echo $(PG_VER_NUMBER) | cut -d. -f1)
-ifeq ($(shell test $(PG_MAJOR_VERSION) -ge 18; echo $$?),0)
+ifeq ($(shell test $(PG_MAJOR_VERSION) -ge 16; echo $$?),0)
   ALPINE_VERSION=3.23
-else ifeq ($(shell test $(PG_MAJOR_VERSION) -ge 16; echo $$?),0)
-  ALPINE_VERSION=3.23
+	CLANG_VERSION=21
 else
   ALPINE_VERSION=3.22
+	CLANG_VERSION=19
 endif
-CLANG_VERSION=19
 
 TS_VERSION=main
 PREV_TS_VERSION=$(shell wget --quiet -O - https://raw.githubusercontent.com/timescale/timescaledb/${TS_VERSION}/version.config | grep -P "(previous_version|update_from_version)" | sed -e 's!^[a-z_]\+_version = !!')
