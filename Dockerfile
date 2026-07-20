@@ -64,7 +64,7 @@ RUN set -ex; \
     make install; \
     apk del .vector-deps
 
-COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
+COPY docker-entrypoint-initdb.d/* /usr/local/bin/
 COPY --from=tools /go/bin/* /usr/local/bin/
 COPY --from=oldversions /usr/local/lib/postgresql/timescaledb-*.so /usr/local/lib/postgresql/
 COPY --from=oldversions /usr/local/share/postgresql/extension/timescaledb--*.sql /usr/local/share/postgresql/extension/
@@ -100,4 +100,6 @@ RUN set -ex \
     && if [ "${OSS_ONLY}" != "" ]; then rm -f $(pg_config --pkglibdir)/timescaledb-tsl-*.so; fi \
     && apk del .fetch-deps .build-deps \
     && rm -rf /build \
-    && sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'timescaledb,\2'/;s/,'/'/" /usr/local/share/postgresql/postgresql.conf.sample
+    && sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'timescaledb,\2'/;s/,'/'/" /usr/local/share/postgresql/postgresql.conf.sample \
+    && sed -ri 's|([\s]*docker_setup_db$)|\1\n000_install_timescaledb.sh\n001_timescaledb_tune.sh\2|g' "$(which docker-entrypoint.sh)"
+
