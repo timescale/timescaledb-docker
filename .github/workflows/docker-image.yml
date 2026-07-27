@@ -57,7 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [15, 16, 17, 18]
+        pg: [16, 17, 18]
         oss: [ "", "-oss" ]
     steps:
       # The github runners have a lot of space in /mnt, but apparently not enough in /. This step removes about 13G.
