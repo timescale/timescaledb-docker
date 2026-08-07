@@ -73,3 +73,12 @@ To not run `timescaledb-tune` at all, use the `NO_TS_TUNE` environment variable:
 ```
 docker run -d --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password -e NO_TS_TUNE=true timescale/timescaledb:latest-pg17
 ```
+
+### About Debian based timescaledb image
+Docker.debian file can be used to create a Debian based timescaledb image. 
+Created images will be based on official debian based postgresql images.
+
+For an image based on PG 13.9-bullesye image:
+```
+docker build -t timescaledb:2.8.1-pg13-bullseye --build-arg PG_TAG=13.9-bullseye --build-arg TS_VERSION=2.8.1 -f Dockerfile.debian .
+```
