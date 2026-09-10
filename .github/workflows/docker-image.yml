@@ -43,60 +43,72 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  ORG: timescaledev #timescaledev
+  ORG: ${{ github.event.inputs.registry == 'prod' && 'timescale' || 'timescaledev' }}
+  # Beta releases are not tagged as latest. An empty BETA adds the latest tag.
+  BETA: ${{ github.event.inputs.tag_latest != 'true' && '1' || '' }}
   TS_VERSION: ${{ github.event.inputs.version || '2.26.0' }}
-  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
 jobs:
 
-  # Build multi-arch TimescaleDB images for both TSL and OSS code.
-  timescaledb:
+  # Build one platform per job and push it by digest. amd64 and arm64 build
+  # on native runners. 386 runs natively on x64. arm/v6 and arm/v7 run under
+  # QEMU on x64.
+  build:
+    name: PG${{ matrix.pg }}${{ matrix.oss }} ${{ matrix.platform }}
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        pg: [16, 17, 18]
+        oss: [ "", "-oss" ]
+        platform: [ linux/amd64, linux/386, linux/arm64, linux/arm/v6, linux/arm/v7 ]
+        include:
+          - platform: linux/amd64
+            runs_on: runs-on/fleet=linux-8cpu-x64-ondemand/env=ue1
+          - platform: linux/386
+            runs_on: runs-on/fleet=linux-8cpu-x64-ondemand/env=ue1
+          - platform: linux/arm64
+            runs_on: runs-on/fleet=linux-8cpu-ondemand/env=ue1
+          - platform: linux/arm/v6
+            runs_on: runs-on/fleet=linux-8cpu-x64-ondemand/env=ue1
+          - platform: linux/arm/v7
+            runs_on: runs-on/fleet=linux-8cpu-x64-ondemand/env=ue1
+    steps:
+      - uses: runs-on/action@46910bf61b41721b0579f237e186afb35477007a # v2.3.0
 
-    name: PG${{ matrix.pg }}${{ matrix.oss }}
-    runs-on: ubuntu-24.04
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/build-platform
+        with:
+          pg: ${{ matrix.pg }}
+          oss: ${{ matrix.oss }}
+          platform: ${{ matrix.platform }}
+          ts_version: ${{ env.TS_VERSION }}
+          org: ${{ env.ORG }}
+          dockerhub_username: ${{ secrets.ORG_DOCKER_HUB_USERNAME }}
+          dockerhub_token: ${{ secrets.ORG_DOCKER_HUB_ACCESS_TOKEN }}
+
+  # Tag the digests of all platforms as one multi-arch image.
+  manifest:
+    name: Manifest PG${{ matrix.pg }}${{ matrix.oss }}
+    needs: [ build ]
+    runs-on: runs-on/fleet=linux-2cpu-ondemand/env=ue1
     strategy:
       fail-fast: false
       matrix:
         pg: [16, 17, 18]
         oss: [ "", "-oss" ]
     steps:
-      # The github runners have a lot of space in /mnt, but apparently not enough in /. This step removes about 13G.
-      - name: remove unneeded runner software
-        run: |
-          df -h
-          du -chs     /usr/share/dotnet /usr/local/lib/android /opt/microsoft || true
-          sudo rm -fr /usr/share/dotnet /usr/local/lib/android /opt/microsoft || true
-          sudo docker image prune --all --force || true
-          df -h
+      - uses: runs-on/action@46910bf61b41721b0579f237e186afb35477007a # v2.3.0
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4.3.0
+      - uses: ./.github/actions/publish-manifest
         with:
-          platforms: all
-
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
-
-      - name: Available platforms
-        run: echo ${{ steps.buildx.outputs.platforms }}
-
-      - name: Login to DockerHub Registry
-        run: echo ${{ secrets.ORG_DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.ORG_DOCKER_HUB_USERNAME }} --password-stdin
-
-      - name: Build and push multi-platform Docker image for TimescaleDB
-        run: |
-          export BETA=1
-          if [ "${{ github.event.inputs.tag_latest }}" == "true" ]
-          then
-              export BETA=
-          fi
-          if [ "${{ github.event.inputs.registry }}" == "prod" ]
-          then
-              export ORG=timescale
-          fi
-          make multi${{ matrix.oss }} ORG=$ORG PG_VER=pg${{ matrix.pg }} \
-              TS_VERSION=$TS_VERSION PREV_EXTRA="${{ matrix.oss }}" BETA=$BETA
-
+          pg: ${{ matrix.pg }}
+          oss: ${{ matrix.oss }}
+          ts_version: ${{ env.TS_VERSION }}
+          org: ${{ env.ORG }}
+          beta: ${{ env.BETA }}
+          dockerhub_username: ${{ secrets.ORG_DOCKER_HUB_USERNAME }}
+          dockerhub_token: ${{ secrets.ORG_DOCKER_HUB_ACCESS_TOKEN }}

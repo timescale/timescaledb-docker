@@ -36,7 +36,7 @@ docker run -d --name some-timescaledb -p 5432:5432 -e TIMESCALEDB_TELEMETRY=off 
 
 Note that if the cluster has previously been initialized, you should not use this environment variable to set the level of telemetry. Instead, follow the [instructions](https://docs.timescale.com/using-timescaledb/telemetry) in our docs to disable telemetry once a cluster is running.
 
-If you are interested in the latest development snapshot of timescaledb there is also a nightly build available under timescaledev/timescaledb:nightly-pg16 (for PG 14, 15 and 16).
+If you are interested in the latest development snapshot of timescaledb there is also a nightly build available under timescaledev/timescaledb:nightly-pg18 (for PG 16, 17 and 18, on linux/amd64 and linux/arm64).
 
 ### Notes on timescaledb-tune
 
