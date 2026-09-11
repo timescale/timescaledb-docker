@@ -1,0 +1,53 @@
+name: Publish manifest
+description: Tag the digests of all platforms of one image as one multi-arch image.
+
+inputs:
+  pg:
+    description: PostgreSQL major version
+    required: true
+  oss:
+    description: '"-oss" for the Apache-only image, empty for the full image'
+    default: ""
+  ts_version:
+    description: TimescaleDB version, tag or branch that was built
+    required: true
+  org:
+    description: Docker Hub organization
+    required: true
+  beta:
+    description: Non-empty skips the latest tag
+    default: "1"
+  tag:
+    description: Tag flags for docker buildx imagetools create. Empty uses the Makefile tags.
+    default: ""
+  dockerhub_username:
+    description: Docker Hub user
+    required: true
+  dockerhub_token:
+    description: Docker Hub access token
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Download digests
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      with:
+        pattern: digest_pg${{ inputs.pg }}${{ inputs.oss }}_*
+        path: digests
+        merge-multiple: true
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+      with:
+        username: ${{ inputs.dockerhub_username }}
+        password: ${{ inputs.dockerhub_token }}
+
+    - name: Publish manifest
+      shell: bash
+      env:
+        TAG: ${{ inputs.tag }}
+      run: |
+        if [ -n "$TAG" ]; then set -- TAG="$TAG"; fi
+        make publish-manifest${{ inputs.oss }} ORG="${{ inputs.org }}" PG_VER="pg${{ inputs.pg }}" \
+            TS_VERSION="${{ inputs.ts_version }}" BETA="${{ inputs.beta }}" "$@"

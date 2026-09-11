@@ -6,13 +6,38 @@ ARG ALPINE_VERSION
 # Build tools binaries in separate image
 ############################
 ARG GO_VERSION=1.26.2
-FROM golang:${GO_VERSION}-alpine AS tools
+# Cross-compile on the build host. Both tools are pure Go, so a static
+# binary works on every target platform without QEMU.
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS tools
 
 ENV TOOLS_VERSION 0.8.1
 
-RUN apk update && apk add --no-cache git gcc musl-dev \
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+# go install puts cross-compiled binaries under /go/bin/<os>_<arch>/, so collect them in /out.
+RUN apk update && apk add --no-cache git \
+    && export CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} GOARM=${TARGETVARIANT#v} \
     && go install github.com/timescale/timescaledb-tune/cmd/timescaledb-tune@latest \
-    && go install github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy@latest
+    && go install github.com/timescale/timescaledb-parallel-copy/cmd/timescaledb-parallel-copy@latest \
+    && mkdir -p /out && find /go/bin -type f -exec mv {} /out/ \;
+
+############################
+# Fetch the sources on the build host. git under QEMU fails intermittently
+# with "cannot pread pack file: Bad address".
+############################
+ARG ALPINE_VERSION
+FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS pgvector-src
+ARG PGVECTOR_VERSION
+RUN apk add --no-cache git \
+    && git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector
+
+ARG ALPINE_VERSION
+FROM --platform=$BUILDPLATFORM alpine:${ALPINE_VERSION} AS timescaledb-src
+ARG TS_COMMIT
+RUN apk add --no-cache git \
+    && git clone https://github.com/timescale/timescaledb /build/timescaledb \
+    && cd /build/timescaledb && git checkout ${TS_COMMIT}
 
 ############################
 # Grab old versions from previous version
@@ -49,36 +74,35 @@ ARG PGVECTOR_VERSION
 ARG PG_VERSION
 ARG CLANG_VERSION
 ARG PG_MAJOR_VERSION
-RUN set -ex; \
+RUN --mount=type=bind,from=pgvector-src,source=/build/pgvector,target=/build/pgvector,rw \
+    set -ex; \
     apk update; \
     apk add --no-cache --virtual .vector-deps \
         postgresql${PG_VERSION}-dev \
-        git \
         build-base \
         clang${CLANG_VERSION} \
         llvm${CLANG_VERSION}-dev \
         llvm${CLANG_VERSION}; \
-    git clone --branch ${PGVECTOR_VERSION} https://github.com/pgvector/pgvector.git /build/pgvector; \
     cd /build/pgvector; \
-    make OPTFLAGS=""; \
+    make -j"$(nproc)" OPTFLAGS=""; \
     make install; \
     apk del .vector-deps
 
 COPY docker-entrypoint-initdb.d/* /docker-entrypoint-initdb.d/
-COPY --from=tools /go/bin/* /usr/local/bin/
+COPY --from=tools /out/* /usr/local/bin/
 COPY --from=oldversions /usr/local/lib/postgresql/timescaledb-*.so /usr/local/lib/postgresql/
 COPY --from=oldversions /usr/local/share/postgresql/extension/timescaledb--*.sql /usr/local/share/postgresql/extension/
 
 ARG TS_VERSION
-RUN set -ex \
+# cmake reads the commit and the previous versions with git, so git stays.
+RUN --mount=type=bind,from=timescaledb-src,source=/build/timescaledb,target=/build/timescaledb,rw \
+    set -ex \
     && apk add --no-cache --virtual .fetch-deps \
                 ca-certificates \
                 git \
                 openssl \
                 openssl-dev \
                 tar \
-    && mkdir -p /build/ \
-    && git clone https://github.com/timescale/timescaledb /build/timescaledb \
     \
     && apk add --no-cache --virtual .build-deps \
                 coreutils \
@@ -92,12 +116,10 @@ RUN set -ex \
     \
     # Build current version \
     && cd /build/timescaledb && rm -fr build \
-    && git checkout ${TS_VERSION} \
     && ./bootstrap -DCMAKE_BUILD_TYPE=RelWithDebInfo -DREGRESS_CHECKS=OFF -DTAP_CHECKS=OFF -DGENERATE_DOWNGRADE_SCRIPT=ON -DWARNINGS_AS_ERRORS=OFF -DPROJECT_INSTALL_METHOD="docker"${OSS_ONLY} \
-    && cd build && make install \
+    && cd build && make -j"$(nproc)" install \
     && cd ~ \
     \
     && if [ "${OSS_ONLY}" != "" ]; then rm -f $(pg_config --pkglibdir)/timescaledb-tsl-*.so; fi \
     && apk del .fetch-deps .build-deps \
-    && rm -rf /build \
     && sed -r -i "s/[#]*\s*(shared_preload_libraries)\s*=\s*'(.*)'/\1 = 'timescaledb,\2'/;s/,'/'/" /usr/local/share/postgresql/postgresql.conf.sample

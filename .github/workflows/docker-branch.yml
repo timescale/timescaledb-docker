@@ -18,36 +18,52 @@ on:
 env:
   ORG: timescaledev
   TS_VERSION: ${{ github.event.inputs.branch }}
-  PLATFORM: linux/amd64
 
 jobs:
 
-  # Build ubuntu TimescaleDB images for both TSL and OSS code.
-  timescaledb:
-
-    name: Docker ${{ github.event.inputs.branch }} PG${{ matrix.pg }}
-    runs-on: ubuntu-latest
+  build:
+    name: Docker ${{ github.event.inputs.branch }} PG${{ matrix.pg }} ${{ matrix.platform }}
+    runs-on: ${{ matrix.runs_on }}
     strategy:
       fail-fast: false
       matrix:
         pg: [17]
-
+        platform: [ linux/amd64 ]
+        include:
+          - platform: linux/amd64
+            runs_on: runs-on/fleet=linux-8cpu-x64/env=ue1
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: runs-on/action@46910bf61b41721b0579f237e186afb35477007a # v2.3.0
 
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-    - name: Linux available buildx platforms
-      run: echo ${{ steps.buildx.outputs.platforms }}
+      - uses: ./.github/actions/build-platform
+        with:
+          pg: ${{ matrix.pg }}
+          platform: ${{ matrix.platform }}
+          ts_version: ${{ env.TS_VERSION }}
+          org: ${{ env.ORG }}
+          dockerhub_username: ${{ secrets.ORG_DOCKER_HUB_USERNAME }}
+          dockerhub_token: ${{ secrets.ORG_DOCKER_HUB_ACCESS_TOKEN }}
 
-    - name: Linux available buildx platforms
-      run: echo ${TS_VERSION}
+  manifest:
+    name: Manifest ${{ github.event.inputs.branch }} PG${{ matrix.pg }}
+    needs: [ build ]
+    runs-on: runs-on/fleet=linux-2cpu/env=ue1
+    strategy:
+      fail-fast: false
+      matrix:
+        pg: [17]
+    steps:
+      - uses: runs-on/action@46910bf61b41721b0579f237e186afb35477007a # v2.3.0
 
-    - name: Login to DockerHub Registry
-      run: echo ${{ secrets.ORG_DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.ORG_DOCKER_HUB_USERNAME }} --password-stdin
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-    - name: Build and push nightly Docker image for TimescaleDB
-      run: make multi ORG=$ORG PG_VER=pg${{ matrix.pg }} TS_VERSION="${TS_VERSION}" PLATFORM=$PLATFORM TAG="-t timescaledev/timescaledb:branch-${TS_VERSION}-pg${{ matrix.pg }}"
-
+      - uses: ./.github/actions/publish-manifest
+        with:
+          pg: ${{ matrix.pg }}
+          ts_version: ${{ env.TS_VERSION }}
+          org: ${{ env.ORG }}
+          tag: -t ${{ env.ORG }}/timescaledb:branch-${{ env.TS_VERSION }}-pg${{ matrix.pg }}
+          dockerhub_username: ${{ secrets.ORG_DOCKER_HUB_USERNAME }}
+          dockerhub_token: ${{ secrets.ORG_DOCKER_HUB_ACCESS_TOKEN }}
