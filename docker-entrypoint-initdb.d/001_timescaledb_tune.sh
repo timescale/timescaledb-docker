@@ -120,4 +120,4 @@ if [ ! -z "${PG_MAJOR}" ]; then
     TS_TUNE_PG_VERSION=--pg-version=${PG_MAJOR}
 fi
 
-/usr/local/bin/timescaledb-tune --quiet --yes --conf-path="${POSTGRESQL_CONF_DIR}/postgresql.conf" ${TS_TUNE_MEMORY_FLAGS} ${TS_TUNE_NUM_CPUS_FLAGS} ${TS_TUNE_MAX_CONNS_FLAGS} ${TS_TUNE_MAX_BG_WORKERS_FLAGS} ${TS_TUNE_WAL_DISK_SIZE_FLAGS} ${TS_TUNE_PG_VERSION}
+timescaledb-tune --quiet --yes --conf-path="${POSTGRESQL_CONF_DIR}/postgresql.conf" ${TS_TUNE_MEMORY_FLAGS} ${TS_TUNE_NUM_CPUS_FLAGS} ${TS_TUNE_MAX_CONNS_FLAGS} ${TS_TUNE_MAX_BG_WORKERS_FLAGS} ${TS_TUNE_WAL_DISK_SIZE_FLAGS} ${TS_TUNE_PG_VERSION}
