@@ -12,5 +12,14 @@
       "minimumReleaseAge": "7 days"
     }
   ],
-  "pinDigests": true
+  "pinDigests": true,
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^Makefile$/"],
+      "matchStrings": ["PGVECTOR_VERSION=(?<currentValue>v?\\d+\\.\\d+\\.\\d+)"],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "pgvector/pgvector"
+    }
+  ]
 }
