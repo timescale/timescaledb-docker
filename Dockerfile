@@ -5,10 +5,10 @@ ARG ALPINE_VERSION
 ############################
 # Build tools binaries in separate image
 ############################
-ARG GO_VERSION=1.27.3
+
 # Cross-compile on the build host. Both tools are pure Go, so a static
 # binary works on every target platform without QEMU.
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS tools
+FROM --platform=$BUILDPLATFORM golang:1.27.3-alpine AS tools
 
 ENV TOOLS_VERSION 0.8.1
 
