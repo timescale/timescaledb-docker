@@ -33,7 +33,7 @@ jobs:
           - platform: linux/arm64
             runs_on: runs-on/fleet=linux-8cpu/env=ue1
     steps:
-      - uses: runs-on/action@46910bf61b41721b0579f237e186afb35477007a # v2.3.0
+      - uses: runs-on/action@17b59092eb37ebfdbb034460892887c09100eaa3 # v2.5.0
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -55,7 +55,7 @@ jobs:
       matrix:
         pg: [16, 17, 18]
     steps:
-      - uses: runs-on/action@46910bf61b41721b0579f237e186afb35477007a # v2.3.0
+      - uses: runs-on/action@17b59092eb37ebfdbb034460892887c09100eaa3 # v2.5.0
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
