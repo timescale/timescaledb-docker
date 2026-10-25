@@ -5,13 +5,8 @@ ORG=timescaledev
 PG_VER=pg17
 PG_VER_NUMBER=$(shell echo $(PG_VER) | cut -c3-)
 PG_MAJOR_VERSION=$(shell echo $(PG_VER_NUMBER) | cut -d. -f1)
-ifeq ($(shell test $(PG_MAJOR_VERSION) -ge 16; echo $$?),0)
-  ALPINE_VERSION=3.24
-	CLANG_VERSION=21
-else
-  ALPINE_VERSION=3.22
-	CLANG_VERSION=19
-endif
+ALPINE_VERSION=3.24
+CLANG_VERSION=21
 
 TS_VERSION=main
 # Resolve TS_VERSION to a commit. BuildKit keys the clone layer on the build
