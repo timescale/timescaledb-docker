@@ -1,4 +1,7 @@
 name: Release Docker Image
+# Manual runs show the version being released and the target registry.
+# Other triggers keep the usual PR title or commit message.
+run-name: ${{ inputs.version && format('Release Docker Image {0} ({1})', inputs.version, inputs.registry) || github.event.pull_request.title || github.event.head_commit.message }}
 on:
   push:
     branches: [ release_docker, dev-build ]
